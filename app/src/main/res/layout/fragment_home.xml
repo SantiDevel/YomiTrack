@@ -5,13 +5,23 @@
     android:background="@color/background"
     tools:context="ui.fragments.home.FragmentHome">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="100dp"
+        android:paddingBottom="32dp"
+        android:clipToPadding="false">
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/mainRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
         android:paddingTop="8dp"
-        android:paddingBottom="32dp"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false"
         android:overScrollMode="never"
         android:contentDescription="@string/home_section_list" />
+
+    </LinearLayout>
 </FrameLayout>

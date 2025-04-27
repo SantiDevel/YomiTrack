@@ -52,16 +52,6 @@
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- BottomAppBar (sin hijos directos) -->
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottombar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="@color/background"
-        app:fabCradleMargin="10dp"
-        app:fabCradleRoundedCornerRadius="50dp" />
-
     <!-- BottomNavigationView (fuera del BottomAppBar) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"

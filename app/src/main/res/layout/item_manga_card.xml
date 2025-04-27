@@ -8,11 +8,12 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="140dp"
-        android:layout_height="190dp"
+        android:layout_width="160dp"
+        android:layout_height="220dp"
         android:scaleType="centerCrop"
-        android:contentDescription="@string/manga_image_desc"
+        android:contentDescription="@string/anime_image_desc"
         android:background="@drawable/rectangle_placeholder" />
+
 
     <TextView
         android:id="@+id/titleTextView"
