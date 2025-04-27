@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">YomiTrack</string>
+    <string name="home_section_list">List of home sections (Airing, Reading, etc.)</string>
+    <string name="manga_image_desc" />
+    <string name="anime_image_desc" />
+</resources>

@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ✅ Tema base sin Material3 -->
+    <style name="Base.Theme.YomiTrack" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Colores personalizados -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary</item>
+        <item name="colorOnPrimary">@color/textPrimary</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/textPrimary</item>
+
+        <!-- ✅ Forzar estilo personalizado para BottomNavigationView -->
+        <item name="bottomNavigationStyle">@style/CustomBottomNav</item>
+    </style>
+
+    <!-- ✅ Tema de la app -->
+    <style name="Theme.YomiTrack" parent="Base.Theme.YomiTrack" />
+
+    <!-- ✅ Estilo personalizado para BottomNavigationView -->
+    <style name="CustomBottomNav" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/primary</item>
+        <item name="itemIconTint">@color/textPrimary</item>
+        <item name="itemTextColor">@color/textPrimary</item>
+    </style>
+
+</resources>
