@@ -5,4 +5,5 @@
     <item name="imageView" type="id" />
     <item name="sectionTitle" type="id" />
     <item name="sectionRecycler" type="id" />
+    <item name="mediaImage" type="id" />
 </resources>

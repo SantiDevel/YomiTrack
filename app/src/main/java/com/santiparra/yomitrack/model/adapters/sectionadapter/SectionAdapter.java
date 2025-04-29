@@ -9,8 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.santiparra.yomitrack.model.ItemModel;
+import com.santiparra.yomitrack.ui.adapters.HomeAdapter;
 import com.santiparra.yomitrack.R;
-import com.santiparra.yomitrack.model.adapters.homeadapter.HomeAdapter;
 
 import java.util.List;
 import java.util.Map;
@@ -18,9 +19,9 @@ import java.util.Map;
 public class SectionAdapter extends RecyclerView.Adapter<SectionAdapter.SectionViewHolder> {
 
     private final List<String> sectionTitles;
-    private final Map<String, List<Integer>> sectionImages;
+    private final Map<String, List<ItemModel>> sectionImages;
 
-    public SectionAdapter(List<String> sectionTitles, Map<String, List<Integer>> sectionImages) {
+    public SectionAdapter(List<String> sectionTitles, Map<String, List<ItemModel>> sectionImages) {
         this.sectionTitles = sectionTitles;
         this.sectionImages = sectionImages;
     }
@@ -35,11 +36,11 @@ public class SectionAdapter extends RecyclerView.Adapter<SectionAdapter.SectionV
     @Override
     public void onBindViewHolder(@NonNull SectionViewHolder holder, int position) {
         String title = sectionTitles.get(position);
-        List<Integer> images = sectionImages.get(title);
+        List<ItemModel> items = sectionImages.get(title);
 
         holder.sectionTitle.setText(title);
 
-        HomeAdapter homeAdapter = new HomeAdapter(images);
+        HomeAdapter homeAdapter = new HomeAdapter(items, title);
         holder.sectionRecycler.setLayoutManager(
                 new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false)
         );
