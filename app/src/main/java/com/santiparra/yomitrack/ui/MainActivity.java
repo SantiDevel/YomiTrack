@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
         /*Implementation of bottomNav*/
         replaceFragment(new FragmentHome());
-        //¡
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();

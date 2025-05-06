@@ -1,4 +1,4 @@
-package com.santiparra.yomitrack.ui.adapters; // Ajusta tu paquete si es necesario
+package com.santiparra.yomitrack.model.adapters.homeadapter; // Ajusta tu paquete si es necesario
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,13 +39,17 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_media_card, parent, false);
+
+        // Ajustamos manualmente el ancho
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        layoutParams.width = (int) (parent.getMeasuredWidth() * 0.85); // 85% del ancho de pantalla
+        view.setLayoutParams(layoutParams);
+
         if (viewType == TYPE_AIRING) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_anime_horizontal_card, parent, false);
             return new AiringViewHolder(view);
         } else {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_anime_card, parent, false);
             return new AnimeViewHolder(view);
         }
     }

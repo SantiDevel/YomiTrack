@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.santiparra.yomitrack.model.ItemModel;
-import com.santiparra.yomitrack.ui.adapters.HomeAdapter;
 import com.santiparra.yomitrack.R;
+import com.santiparra.yomitrack.model.adapters.homeadapter.HomeAdapter;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +41,7 @@ public class SectionAdapter extends RecyclerView.Adapter<SectionAdapter.SectionV
         holder.sectionTitle.setText(title);
 
         HomeAdapter homeAdapter = new HomeAdapter(items, title);
+
         holder.sectionRecycler.setLayoutManager(
                 new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false)
         );

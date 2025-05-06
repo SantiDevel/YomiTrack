@@ -4,4 +4,6 @@
     <string name="manga_image_desc" />
     <string name="anime_image_desc" />
     <string name="media_image_desc">Media Image</string>
+    <string name="profile">\n</string>
+    <string name="write_a_status">Write a status...</string>
 </resources>

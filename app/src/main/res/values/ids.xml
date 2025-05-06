@@ -6,4 +6,15 @@
     <item name="sectionTitle" type="id" />
     <item name="sectionRecycler" type="id" />
     <item name="mediaImage" type="id" />
+    <item name="mainRecyclerView" type="id" />
+    <item name="editStatus" type="id" />
+    <item name="activityCard" type="id" />
+    <item name="activityImage" type="id" />
+    <item name="activityUser" type="id" />
+    <item name="activityText" type="id" />
+    <item name="activityTime" type="id" />
+    <item name="activityTitle" type="id" />
+    <item name="activityAction" type="id" />
+    <item name="statLabelFull" type="id" />
+    <item name="statProgressBar" type="id" />
 </resources>
