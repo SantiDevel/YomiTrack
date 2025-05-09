@@ -1,4 +1,4 @@
-package com.santiparra.yomitrack.model.adapters.homeadapter; // Ajusta tu paquete si es necesario
+package com.santiparra.yomitrack.model.adapters.homeadapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +44,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         // Ajustamos manualmente el ancho
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-        layoutParams.width = (int) (parent.getMeasuredWidth() * 0.85); // 85% del ancho de pantalla
         view.setLayoutParams(layoutParams);
 
         if (viewType == TYPE_AIRING) {

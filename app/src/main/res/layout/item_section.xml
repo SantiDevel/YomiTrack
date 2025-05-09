@@ -1,31 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:paddingHorizontal="16dp"
     android:paddingTop="12dp"
-    android:paddingBottom="0dp">
+    android:paddingBottom="12dp">
 
+    <!-- Título de la sección -->
     <TextView
         android:id="@+id/sectionTitle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Section Title"
-        android:textSize="22sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/textPrimary"
-        android:paddingBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
 
+    <!-- Lista horizontal de ítems -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/sectionRecycler"
+        android:id="@+id/sectionRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
         android:overScrollMode="never"
-        android:nestedScrollingEnabled="false"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:nestedScrollingEnabled="false" />
 </LinearLayout>

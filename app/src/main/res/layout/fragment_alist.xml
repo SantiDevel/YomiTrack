@@ -1,16 +1,224 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:background="@color/background"
-    tools:context="ui.fragments.anime_list.FragmentAnime">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <TextView
+    <!-- Parte superior: imagen de fondo + avatar + nombre -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Anime"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:textColor="@color/textPrimary"/>
+        android:layout_height="200dp"
+        android:background="@drawable/sample_cover"
+        android:padding="12dp">
 
-</FrameLayout>
+        <ImageView
+            android:id="@+id/imageViewBanner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sample_cover"
+            android:contentDescription="Profile background" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="bottom"
+            android:paddingBottom="16dp">
+
+            <ImageView
+                android:id="@+id/imageViewAvatar"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_profile"
+                android:background="@drawable/circle_mask"
+                android:scaleType="centerCrop"
+                android:clipToOutline="true"
+                android:contentDescription="Profile picture" />
+
+            <TextView
+                android:id="@+id/textViewUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BtwIsSanti"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:gravity="center_vertical"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Tabs simulados -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/primary"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Overview"
+            android:textColor="@color/textPrimary"
+            android:layout_height="0dp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Anime List"
+            android:textColor="@color/textPrimary"
+            android:textStyle="bold"
+            android:layout_height="0dp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Manga List"
+            android:textColor="@color/textPrimary"
+            android:layout_height="0dp"/>
+    </LinearLayout>
+
+    <!-- Campo de búsqueda + botón de filtro + botones de vista -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:weightSum="1">
+
+        <EditText
+            android:id="@+id/editTextFilter"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.6"
+            android:hint="Filter"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:background="@drawable/edittext_background"
+            android:padding="8dp"
+            android:textColor="@color/textPrimary"
+            android:inputType="text"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/buttonFilterMenu"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:src="@drawable/ic_more_vert"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Filter menu"
+            android:padding="4dp"
+            app:tint="@color/textPrimary" />
+
+        <ImageButton
+            android:id="@+id/buttonViewGrid"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:src="@drawable/ic_view_module"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Grid view"
+            android:padding="4dp" />
+
+        <ImageButton
+            android:id="@+id/buttonViewList"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:src="@drawable/ic_view_list"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="List view"
+            android:padding="4dp" />
+
+        <ImageButton
+            android:id="@+id/buttonViewLarge"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:src="@drawable/ic_view_comfy"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Large view"
+            android:padding="4dp" />
+    </LinearLayout>
+
+
+    <!-- Título del estado actual -->
+    <TextView
+        android:id="@+id/textViewWatching"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Watching"
+        android:textColor="@color/textPrimary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="2dp" />
+
+
+
+    <!-- Encabezado tipo tabla -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@color/primary">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="Title"
+            android:textColor="@color/textPrimary"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:text="Score"
+            android:textColor="@color/textPrimary"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:text="Type"
+            android:textColor="@color/textPrimary"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:text="⋮"
+            android:textColor="@color/textPrimary"
+            android:gravity="end"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Lista de anime -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewAnimeList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="8dp" />
+</LinearLayout>
+

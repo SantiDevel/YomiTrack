@@ -9,8 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.santiparra.yomitrack.model.ItemModel;
 import com.santiparra.yomitrack.R;
+import com.santiparra.yomitrack.model.ItemModel;
 import com.santiparra.yomitrack.model.adapters.homeadapter.HomeAdapter;
 
 import java.util.List;
@@ -19,11 +19,11 @@ import java.util.Map;
 public class SectionAdapter extends RecyclerView.Adapter<SectionAdapter.SectionViewHolder> {
 
     private final List<String> sectionTitles;
-    private final Map<String, List<ItemModel>> sectionImages;
+    private final Map<String, List<ItemModel>> sectionItems;
 
-    public SectionAdapter(List<String> sectionTitles, Map<String, List<ItemModel>> sectionImages) {
+    public SectionAdapter(List<String> sectionTitles, Map<String, List<ItemModel>> sectionItems) {
         this.sectionTitles = sectionTitles;
-        this.sectionImages = sectionImages;
+        this.sectionItems = sectionItems;
     }
 
     @NonNull
@@ -35,17 +35,14 @@ public class SectionAdapter extends RecyclerView.Adapter<SectionAdapter.SectionV
 
     @Override
     public void onBindViewHolder(@NonNull SectionViewHolder holder, int position) {
-        String title = sectionTitles.get(position);
-        List<ItemModel> items = sectionImages.get(title);
+        String sectionTitle = sectionTitles.get(position);
+        holder.title.setText(sectionTitle);
 
-        holder.sectionTitle.setText(title);
+        List<ItemModel> fullList = sectionItems.get(sectionTitle);
 
-        HomeAdapter homeAdapter = new HomeAdapter(items, title);
-
-        holder.sectionRecycler.setLayoutManager(
-                new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false)
-        );
-        holder.sectionRecycler.setAdapter(homeAdapter);
+        HomeAdapter adapter = new HomeAdapter(fullList, sectionTitle);
+        holder.recyclerView.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
+        holder.recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -54,13 +51,13 @@ public class SectionAdapter extends RecyclerView.Adapter<SectionAdapter.SectionV
     }
 
     static class SectionViewHolder extends RecyclerView.ViewHolder {
-        TextView sectionTitle;
-        RecyclerView sectionRecycler;
+        TextView title;
+        RecyclerView recyclerView;
 
         public SectionViewHolder(@NonNull View itemView) {
             super(itemView);
-            sectionTitle = itemView.findViewById(R.id.sectionTitle);
-            sectionRecycler = itemView.findViewById(R.id.sectionRecycler);
+            title = itemView.findViewById(R.id.sectionTitle);
+            recyclerView = itemView.findViewById(R.id.sectionRecyclerView);
         }
     }
 }

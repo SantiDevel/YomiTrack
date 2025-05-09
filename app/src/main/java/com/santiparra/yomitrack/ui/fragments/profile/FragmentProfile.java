@@ -1,6 +1,7 @@
 package com.santiparra.yomitrack.ui.fragments.profile;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,8 @@ import java.util.List;
 
 public class FragmentProfile extends Fragment {
 
-    public FragmentProfile() {}
+    public FragmentProfile() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,11 +34,25 @@ public class FragmentProfile extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         TextView usernameText = view.findViewById(R.id.usernameText);
-        TextView descriptionText = view.findViewById(R.id.descriptionText);
+        TextView descriptionText = view.findViewById(R.id.profileDescriptionText);
+        TextView seeMore = view.findViewById(R.id.textViewSeeMore);
         LinearLayout statsContainer = view.findViewById(R.id.animeStatsContainer);
 
         usernameText.setText("BtwIsSanti");
-        descriptionText.setText("Eiko is my waifu right now\nMai and Mikasa is my second wife");
+        descriptionText.setText("Eiko is my waifu right now. Mai and Mikasa is my second wife. Long live anime.");
+
+
+        seeMore.setOnClickListener(v -> {
+            if (descriptionText.getMaxLines() == 2) {
+                descriptionText.setMaxLines(Integer.MAX_VALUE);
+                descriptionText.setEllipsize(null);
+                seeMore.setText("Ver menos");
+            } else {
+                descriptionText.setMaxLines(2);
+                descriptionText.setEllipsize(TextUtils.TruncateAt.END);
+                seeMore.setText("Ver más");
+            }
+        });
 
         // Cargar estadísticas simuladas
         List<UserStats> statsList = StatsHelper.getAnimeStats();
@@ -91,7 +107,7 @@ public class FragmentProfile extends Fragment {
                     "Watched episode 10 of Dr. Stone",
                     "Watched episode 9 of Mushoku Tensei",
                     "Watched episode 11 of Ousama Ranking",
-                    "Watched episode 7 of HUNTER×HUNTER" // Se ignora si hay más de 10
+                    "Watched episode 7 of HUNTER×HUNTER"
             };
 
             int limit = Math.min(10, activities.length);
@@ -126,16 +142,25 @@ public class FragmentProfile extends Fragment {
 
             int colorRes = R.color.primary;
             switch (stat.getCategory()) {
-                case "Reading": colorRes = R.color.statWatching; break;
-                case "Completed": colorRes = R.color.statCompleted; break;
-                case "On Hold": colorRes = R.color.statOnHold; break;
-                case "Dropped": colorRes = R.color.statDropped; break;
-                case "Plan to Read": colorRes = R.color.statPlanToWatch; break;
+                case "Reading":
+                    colorRes = R.color.statWatching;
+                    break;
+                case "Completed":
+                    colorRes = R.color.statCompleted;
+                    break;
+                case "On Hold":
+                    colorRes = R.color.statOnHold;
+                    break;
+                case "Dropped":
+                    colorRes = R.color.statDropped;
+                    break;
+                case "Plan to Read":
+                    colorRes = R.color.statPlanToWatch;
+                    break;
             }
 
             bar.setProgressTintList(ContextCompat.getColorStateList(requireContext(), colorRes));
             mangaStatsContainer.addView(statView);
         }
-
     }
 }

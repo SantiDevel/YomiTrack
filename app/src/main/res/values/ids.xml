@@ -17,4 +17,7 @@
     <item name="activityAction" type="id" />
     <item name="statLabelFull" type="id" />
     <item name="statProgressBar" type="id" />
+    <item name="imageViewCover" type="id" />
+    <item name="textViewProgress" type="id" />
+    <item name="textViewTitle" type="id" />
 </resources>
