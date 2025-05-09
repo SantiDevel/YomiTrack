@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/filter_all" android:title="All" />
+    <item android:id="@+id/filter_watching" android:title="Watching" />
+    <item android:id="@+id/filter_planning" android:title="Planning" />
+    <item android:id="@+id/filter_paused" android:title="Paused" />
+    <item android:id="@+id/filter_dropped" android:title="Dropped" />
+    <item android:id="@+id/filter_completed" android:title="Completed" />
+</menu>

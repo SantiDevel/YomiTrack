@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <!-- Título encima de la barra -->
+    <TextView
+        android:id="@+id/statLabelFull"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Completed • 265"
+        android:textSize="14sp"
+        android:textColor="@color/textPrimary"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Barra -->
+    <ProgressBar
+        android:id="@+id/statProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:max="100"
+        android:progress="0"
+        android:progressDrawable="@drawable/progress_bar" />
+</LinearLayout>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activityCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp"
+    android:backgroundTint="@color/primary">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Imagen de portada -->
+        <ImageView
+            android:id="@+id/activityCover"
+            android:layout_width="80dp"
+            android:layout_height="110dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sample_cover"
+            android:layout_alignParentStart="true" />
+
+        <!-- Layout de contenido -->
+        <LinearLayout
+            android:id="@+id/contentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/activityCover"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical"
+            android:layout_alignTop="@id/activityCover"
+            android:layout_alignBottom="@id/activityCover"
+            android:layout_marginEnd="36dp">
+
+            <!-- Usuario y hora -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/activityUser"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Usuario"
+                    android:textColor="@color/textPrimary"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/activityTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 minutes ago"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Acción -->
+            <TextView
+                android:id="@+id/activityAction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scored 9/10 on"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp" />
+
+            <!-- Título -->
+            <TextView
+                android:id="@+id/activityTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chainsaw Man"
+                android:textColor="@color/activeTint"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Mini foto de perfil -->
+            <ImageView
+                android:id="@+id/activityMiniThumb"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginBottom="4dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile"
+                android:background="@drawable/circle_mask"
+                android:clipToOutline="true" />
+        </LinearLayout>
+
+        <!-- Iconos de comentario y like -->
+        <LinearLayout
+            android:id="@+id/activityActions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignBottom="@+id/activityCover"
+            android:layout_alignParentEnd="true">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_comment"
+                app:tint="@color/textPrimary" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_heart"
+                app:tint="@color/textPrimary" />
+        </LinearLayout>
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
