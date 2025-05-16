@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="100dp"
+    android:paddingBottom="80dp"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/editTextAnimeTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Título del anime"
+            android:inputType="text"
+            android:padding="12dp"
+            android:background="@drawable/edit_text_background" />
+
+        <EditText
+            android:id="@+id/editTextScore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Puntuación (0-100)"
+            android:inputType="number"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editTextProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Progreso (episodios vistos)"
+            android:inputType="number"
+            android:layout_marginTop="12dp" />
+
+        <Spinner
+            android:id="@+id/spinnerStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="8dp" />
+
+        <Spinner
+            android:id="@+id/spinnerType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="8dp" />
+
+        <Button
+            android:id="@+id/buttonSaveAnime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guardar cambios"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+</ScrollView>
