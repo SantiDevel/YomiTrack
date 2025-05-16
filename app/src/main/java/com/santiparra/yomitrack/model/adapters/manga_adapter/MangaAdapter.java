@@ -1,136 +1,162 @@
+// MangaAdapter.java actualizado con statusDot dinámico
+
 package com.santiparra.yomitrack.model.adapters.manga_adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.santiparra.yomitrack.R;
-import com.santiparra.yomitrack.model.AnimeItem;
+import com.santiparra.yomitrack.db.entities.MangaEntity;
 
 import java.util.List;
 
 public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHolder> {
 
-    private final List<AnimeItem> mangaList;
-    private final Context context;
-    private int viewMode = 0;
+    public static final int VIEW_NORMAL = 0;
+    public static final int VIEW_COMPACT = 1;
+    public static final int VIEW_LARGE = 2;
 
-    public interface OnMangaRemoveListener {
-        void onMangaRemoved(AnimeItem manga);
-    }
+    private List<MangaEntity> mangaList;
+    private int viewType;
+    private final OnMangaClickListener onEditClick;
+    private final OnMangaClickListener onLongClick;
 
-    private OnMangaRemoveListener removeListener;
-
-    public void setOnMangaRemoveListener(OnMangaRemoveListener listener) {
-        this.removeListener = listener;
-    }
-
-    public void setViewMode(int mode) {
-        this.viewMode = mode;
-    }
-
-    public MangaAdapter(Context context, List<AnimeItem> mangaList) {
-        this.context = context;
+    public MangaAdapter(List<MangaEntity> mangaList, int viewType,
+                        OnMangaClickListener onEditClick,
+                        OnMangaClickListener onLongClick) {
         this.mangaList = mangaList;
+        this.viewType = viewType;
+        this.onEditClick = onEditClick;
+        this.onLongClick = onLongClick;
+    }
+
+    public void setViewType(int viewType) {
+        this.viewType = viewType;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public MangaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        int layoutId;
-        switch (viewMode) {
-            case 1:
-                layoutId = R.layout.item_anime_large;
-                break;
-            case 2:
-                layoutId = R.layout.item_anime_compact;
-                break;
-            default:
-                layoutId = R.layout.item_anime;
-                break;
-        }
-        View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
+        int layout = R.layout.item_manga;
+        if (viewType == VIEW_COMPACT) layout = R.layout.item_manga_compact;
+        else if (viewType == VIEW_LARGE) layout = R.layout.item_manga_large;
+
+        View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new MangaViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MangaViewHolder holder, int position) {
-        AnimeItem manga = mangaList.get(position);
+        MangaEntity manga = mangaList.get(position);
 
-        if (holder.title != null)
-            holder.title.setText(manga.getTitle());
+        String title = manga.getTitle() != null ? manga.getTitle() : "Sin título";
+        String status = manga.getStatus() != null ? manga.getStatus() : "";
+        String type = manga.getType() != null ? manga.getType() : "";
+        String imageUrl = manga.getImageUrl();
 
-        if (holder.progress != null)
-            holder.progress.setText("Progress: " + manga.getWatchedEpisodes() + "/" + manga.getTotalEpisodes());
+        if (holder.textTitle != null) holder.textTitle.setText(title);
 
-        if (holder.score != null)
-            holder.score.setText(String.valueOf(manga.getScore()));
-
-        if (holder.type != null)
-            holder.type.setText(manga.getType());
-
-        if (holder.cover != null) {
-            Glide.with(context)
-                    .load(manga.getImageUrl())
-                    .placeholder(R.drawable.sample_anime_cover)
-                    .into(holder.cover);
+        if (holder.textStatus != null) {
+            String statusText = status + (type.isEmpty() ? "" : " • " + type);
+            holder.textStatus.setText(statusText);
         }
 
-        if (holder.buttonOptions != null) {
-            holder.buttonOptions.setOnClickListener(v -> {
-                PopupMenu popup = new PopupMenu(context, holder.buttonOptions);
-                popup.inflate(R.menu.anime_item_menu);
-                popup.setOnMenuItemClickListener(item -> {
-                    int id = item.getItemId();
-                    if (id == R.id.action_edit) {
-                        Toast.makeText(context, "Edit: " + manga.getTitle(), Toast.LENGTH_SHORT).show();
-                        return true;
-                    } else if (id == R.id.action_remove) {
-                        int pos = holder.getAdapterPosition();
-                        if (pos != RecyclerView.NO_POSITION) {
-                            AnimeItem removed = mangaList.remove(pos);
-                            notifyItemRemoved(pos);
-                            if (removeListener != null) {
-                                removeListener.onMangaRemoved(removed);
-                            }
-                            Toast.makeText(context, "Removed: " + removed.getTitle(), Toast.LENGTH_SHORT).show();
-                        }
-                        return true;
-                    }
-                    return false;
-                });
-                popup.show();
-            });
+        if (holder.textProgress != null) {
+            holder.textProgress.setText(manga.getProgress() + " caps");
         }
+
+        if (holder.textScore != null) {
+            holder.textScore.setText("Score: " + manga.getScore());
+        }
+
+        if (holder.textType != null) {
+            holder.textType.setText("Tipo: " + type);
+        }
+
+        if (holder.imageCover != null && imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.rectangle_placeholder)
+                    .into(holder.imageCover);
+        } else if (holder.imageCover != null) {
+            holder.imageCover.setImageResource(R.drawable.rectangle_placeholder);
+        }
+
+        if (holder.statusDot != null) {
+            int colorResId;
+            switch (manga.getStatus()) {
+                case "Completed":
+                    colorResId = R.color.status_completed;
+                    break;
+                case "Reading":
+                    colorResId = R.color.status_watching;
+                    break;
+                case "Paused":
+                    colorResId = R.color.status_paused;
+                    break;
+                case "Dropped":
+                    colorResId = R.color.status_dropped;
+                    break;
+                case "Planning":
+                default:
+                    colorResId = R.color.status_planning;
+                    break;
+            }
+            holder.statusDot.setBackgroundTintList(
+                    ContextCompat.getColorStateList(holder.itemView.getContext(), colorResId)
+            );
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onEditClick != null) onEditClick.onClick(manga);
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (onLongClick != null) {
+                onLongClick.onClick(manga);
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
     public int getItemCount() {
-        return mangaList.size();
+        return mangaList != null ? mangaList.size() : 0;
     }
 
-    static class MangaViewHolder extends RecyclerView.ViewHolder {
-        TextView title, progress, score, type;
-        ImageView cover, buttonOptions;
+    @Override
+    public int getItemViewType(int position) {
+        return viewType;
+    }
 
-        MangaViewHolder(View itemView) {
+    public static class MangaViewHolder extends RecyclerView.ViewHolder {
+        ImageView imageCover;
+        TextView textTitle, textStatus, textProgress, textScore, textType;
+        View statusDot;
+
+        public MangaViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.textViewTitle);
-            progress = itemView.findViewById(R.id.textViewProgress);
-            score = itemView.findViewById(R.id.textViewScore);
-            type = itemView.findViewById(R.id.textViewType);
-            cover = itemView.findViewById(R.id.imageViewCover);
-            buttonOptions = itemView.findViewById(R.id.buttonOptions);
+            imageCover = itemView.findViewById(R.id.imageCover);
+            textTitle = itemView.findViewById(R.id.textTitle);
+            textStatus = itemView.findViewById(R.id.textStatus);
+            textProgress = itemView.findViewById(R.id.textProgress);
+            textScore = itemView.findViewById(R.id.textScore);
+            textType = itemView.findViewById(R.id.textType);
+            statusDot = itemView.findViewById(R.id.statusDot);
         }
     }
-}
 
+    public interface OnMangaClickListener {
+        void onClick(MangaEntity manga);
+    }
+}

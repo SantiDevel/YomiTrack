@@ -20,4 +20,35 @@
     <item name="imageViewCover" type="id" />
     <item name="textViewProgress" type="id" />
     <item name="textViewTitle" type="id" />
+    <item name="buttonFilter" type="id" />
+    <item name="recyclerViewBrowse" type="id" />
+    <item name="spinnerType" type="id" />
+    <item name="textViewBrowse" type="id" />
+    <item name="editTextSearch" type="id" />
+    <item name="sectionContainer" type="id" />
+    <item name="statusBarSpacer" type="id" />
+    <item name="editTextPasswordRegister" type="id" />
+    <item name="buttonRegister" type="id" />
+    <item name="buttonAddItem" type="id" />
+    <item name="editTextPassword" type="id" />
+    <item name="buttonLogin" type="id" />
+    <item name="buttonGuest" type="id" />
+    <item name="buttonGoRegister" type="id" />
+    <item name="editTextUsername" type="id" />
+    <item name="fabAddAnime" type="id" />
+    <item name="recyclerViewAnime" type="id" />
+    <item name="fabAddManga" type="id" />
+    <item name="recyclerViewManga" type="id" />
+    <item name="imageViewBanner" type="id" />
+    <item name="imageViewAvatar" type="id" />
+    <item name="textViewUsername" type="id" />
+    <item name="buttonChangeViewType" type="id" />
+    <item name="recyclerSearchResults" type="id" />
+    <item name="buttonAddAnime" type="id" />
+    <item name="spinnerStatus" type="id" />
+    <item name="editTextAnimeTitle" type="id" />
+    <item name="spinnerEditStatus" type="id" />
+    <item name="buttonSaveAnime" type="id" />
+    <item name="statusDot" type="id" />
+    <item name="editSearch" type="id" />
 </resources>

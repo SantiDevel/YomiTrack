@@ -7,4 +7,39 @@
     <string name="profile">\n</string>
     <string name="write_a_status">Write a status...</string>
     <string name="show_more" />
+    <string-array name="media_types">
+        <item>Anime</item>
+        <item>Manga</item>
+    </string-array>
+    <string-array name="anime_status_array">
+        <item>Watching</item>
+        <item>Completed</item>
+        <item>Paused</item>
+        <item>Dropped</item>
+        <item>Planning</item>
+    </string-array>
+
+    <string-array name="anime_type_array">
+        <item>TV</item>
+        <item>Movie</item>
+        <item>OVA</item>
+        <item>ONA</item>
+        <item>Special</item>
+    </string-array>
+
+    <string-array name="manga_status_array">
+        <item>Reading</item>
+        <item>Completed</item>
+        <item>Paused</item>
+        <item>Dropped</item>
+        <item>Planning</item>
+    </string-array>
+
+    <string-array name="manga_type_array">
+        <item>Manga</item>
+        <item>Manhwa</item>
+        <item>Manhua</item>
+        <item>Novel</item>
+        <item>One-shot</item>
+    </string-array>
 </resources>

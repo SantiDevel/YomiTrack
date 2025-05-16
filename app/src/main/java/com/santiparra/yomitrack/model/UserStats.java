@@ -1,5 +1,9 @@
 package com.santiparra.yomitrack.model;
 
+/**
+ * Representa una estadística del usuario, usada para barras de progreso.
+ * Incluye categoría, cantidad y porcentaje de completado.
+ */
 public class UserStats {
     private String category;
     private int count;

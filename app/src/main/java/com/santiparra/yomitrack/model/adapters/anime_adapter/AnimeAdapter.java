@@ -5,131 +5,174 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.santiparra.yomitrack.R;
-import com.santiparra.yomitrack.model.AnimeItem;
+import com.santiparra.yomitrack.db.entities.AnimeEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.AnimeViewHolder> {
 
-    private final List<AnimeItem> animeList;
-    private final Context context;
-    private int viewMode = 0;
+    public static final int VIEW_NORMAL = 0;
+    public static final int VIEW_COMPACT = 1;
+    public static final int VIEW_LARGE = 2;
 
-    public interface OnAnimeRemoveListener {
-        void onAnimeRemoved(AnimeItem anime);
+    private List<AnimeEntity> animeList;
+    private int viewType;
+    private final OnAnimeClickListener onEditClick;
+    private final OnAnimeClickListener onLongClick;
+
+    // ✅ Constructor optimizado para uso simple
+    public AnimeAdapter(Context context) {
+        this.animeList = new ArrayList<>();
+        this.viewType = VIEW_NORMAL;
+        this.onEditClick = null;
+        this.onLongClick = null;
     }
 
-    private OnAnimeRemoveListener removeListener;
-
-    public void setOnAnimeRemoveListener(OnAnimeRemoveListener listener) {
-        this.removeListener = listener;
-    }
-
-    public void setViewMode(int mode) {
-        this.viewMode = mode;
-    }
-
-    public AnimeAdapter(Context context, List<AnimeItem> animeList) {
-        this.context = context;
+    public AnimeAdapter(List<AnimeEntity> animeList, int viewType,
+                        OnAnimeClickListener onEditClick,
+                        OnAnimeClickListener onLongClick) {
         this.animeList = animeList;
+        this.viewType = viewType;
+        this.onEditClick = onEditClick;
+        this.onLongClick = onLongClick;
+    }
+
+    public void setViewType(int viewType) {
+        this.viewType = viewType;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public AnimeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        int layoutId;
-        switch (viewMode) {
-            case 1:
-                layoutId = R.layout.item_anime_large; // solo imagen con score y episodios
-                break;
-            case 2:
-                layoutId = R.layout.item_anime_compact; // solo texto
-                break;
-            default:
-                layoutId = R.layout.item_anime; // imagen + texto
-                break;
-        }
-        View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
+        int layout = R.layout.item_anime;
+        if (viewType == VIEW_COMPACT) layout = R.layout.item_anime_compact;
+        else if (viewType == VIEW_LARGE) layout = R.layout.item_anime_large;
+
+        View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new AnimeViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull AnimeViewHolder holder, int position) {
-        AnimeItem anime = animeList.get(position);
+        AnimeEntity anime = animeList.get(position);
 
-        if (holder.title != null)
-            holder.title.setText(anime.getTitle());
+        String title = anime.getTitle() != null ? anime.getTitle() : "Sin título";
+        String status = anime.getStatus() != null ? anime.getStatus() : "";
+        String type = anime.getType() != null ? anime.getType() : "";
+        String imageUrl = anime.getImageUrl();
 
-        if (holder.progress != null)
-            holder.progress.setText("Progress: " + anime.getWatchedEpisodes() + "/" + anime.getTotalEpisodes());
+        if (holder.textTitle != null) holder.textTitle.setText(title);
 
-        if (holder.score != null)
-            holder.score.setText(String.valueOf(anime.getScore()));
-
-        if (holder.type != null)
-            holder.type.setText(anime.getType());
-
-        if (holder.cover != null) {
-            Glide.with(context)
-                    .load(anime.getImageUrl())
-                    .placeholder(R.drawable.sample_anime_cover)
-                    .into(holder.cover);
+        if (holder.textStatus != null) {
+            String statusText = status + (type.isEmpty() ? "" : " • " + type);
+            holder.textStatus.setText(statusText);
         }
 
-        if (holder.buttonOptions != null) {
-            holder.buttonOptions.setOnClickListener(v -> {
-                PopupMenu popup = new PopupMenu(context, holder.buttonOptions);
-                popup.inflate(R.menu.anime_item_menu);
-                popup.setOnMenuItemClickListener(item -> {
-                    int id = item.getItemId();
-                    if (id == R.id.action_edit) {
-                        Toast.makeText(context, "Edit: " + anime.getTitle(), Toast.LENGTH_SHORT).show();
-                        return true;
-                    } else if (id == R.id.action_remove) {
-                        int pos = holder.getAdapterPosition();
-                        if (pos != RecyclerView.NO_POSITION) {
-                            AnimeItem removed = animeList.remove(pos);
-                            notifyItemRemoved(pos);
-                            if (removeListener != null) {
-                                removeListener.onAnimeRemoved(removed);
-                            }
-                            Toast.makeText(context, "Removed: " + removed.getTitle(), Toast.LENGTH_SHORT).show();
-                        }
-                        return true;
-                    }
-                    return false;
-                });
-                popup.show();
-            });
+        if (holder.textProgress != null) {
+            String progress = anime.getProgress() + " eps";
+            holder.textProgress.setText(progress);
         }
+
+        if (holder.textScore != null) {
+            holder.textScore.setText("Score: " + anime.getScore());
+        }
+
+        if (holder.textType != null) {
+            holder.textType.setText("Tipo: " + type);
+        }
+
+        if (holder.imageCover != null && imageUrl != null && !imageUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.rectangle_placeholder)
+                    .into(holder.imageCover);
+        } else if (holder.imageCover != null) {
+            holder.imageCover.setImageResource(R.drawable.rectangle_placeholder);
+        }
+
+        if (holder.statusDot != null) {
+            int colorResId;
+            switch (anime.getStatus()) {
+                case "Completed":
+                    colorResId = R.color.status_completed;
+                    break;
+                case "Watching":
+                    colorResId = R.color.status_watching;
+                    break;
+                case "Paused":
+                    colorResId = R.color.status_paused;
+                    break;
+                case "Dropped":
+                    colorResId = R.color.status_dropped;
+                    break;
+                case "Planning":
+                default:
+                    colorResId = R.color.status_planning;
+                    break;
+            }
+            holder.statusDot.setBackgroundTintList(
+                    ContextCompat.getColorStateList(holder.itemView.getContext(), colorResId)
+            );
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onEditClick != null) onEditClick.onClick(anime);
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (onLongClick != null) {
+                onLongClick.onClick(anime);
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
     public int getItemCount() {
-        return animeList.size();
+        return animeList != null ? animeList.size() : 0;
     }
 
-    static class AnimeViewHolder extends RecyclerView.ViewHolder {
-        TextView title, progress, score, type;
-        ImageView cover, buttonOptions;
+    @Override
+    public int getItemViewType(int position) {
+        return viewType;
+    }
 
-        AnimeViewHolder(View itemView) {
+    public static class AnimeViewHolder extends RecyclerView.ViewHolder {
+        ImageView imageCover;
+        TextView textTitle, textStatus, textProgress, textScore, textType;
+        View statusDot;
+
+        public AnimeViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.textViewTitle);
-            progress = itemView.findViewById(R.id.textViewProgress);
-            score = itemView.findViewById(R.id.textViewScore);
-            type = itemView.findViewById(R.id.textViewType);
-            cover = itemView.findViewById(R.id.imageViewCover);
-            buttonOptions = itemView.findViewById(R.id.buttonOptions);
+            imageCover = itemView.findViewById(R.id.imageCover);
+            textTitle = itemView.findViewById(R.id.textTitle);
+            textStatus = itemView.findViewById(R.id.textStatus);
+            textProgress = itemView.findViewById(R.id.textProgress);
+            textScore = itemView.findViewById(R.id.textScore);
+            textType = itemView.findViewById(R.id.textType);
+            statusDot = itemView.findViewById(R.id.statusDot);
         }
     }
+
+    public void updateList(List<AnimeEntity> newList) {
+        this.animeList = newList;
+        notifyDataSetChanged();
+    }
+
+
+    public interface OnAnimeClickListener {
+        void onClick(AnimeEntity anime);
+    }
+
 }

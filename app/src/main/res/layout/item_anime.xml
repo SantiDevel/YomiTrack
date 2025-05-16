@@ -1,74 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp"
-    android:gravity="center_vertical">
+    android:padding="12dp">
 
     <ImageView
-        android:id="@+id/imageViewCover"
-        android:layout_width="40dp"
-        android:layout_height="55dp"
-        android:layout_marginEnd="8dp"
+        android:id="@+id/imageCover"
+        android:layout_width="72dp"
+        android:layout_height="96dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/sample_anime_cover"
-        android:background="@drawable/rounded_mask"
-        android:clipToOutline="true" />
+        android:layout_marginEnd="12dp"
+        android:contentDescription="Portada" />
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:orientation="vertical">
+        android:layout_weight="1">
 
         <TextView
-            android:id="@+id/textViewTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Anime Title"
-            android:textColor="@color/textPrimary"
-            android:textStyle="bold"
-            android:maxLines="2"
-            android:textSize="14sp"
-            android:ellipsize="end" />
-
-        <TextView
-            android:id="@+id/textViewProgress"
+            android:id="@+id/textTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5 / 12"
-            android:textColor="@color/textPrimary"
-            android:textSize="12sp" />
+            android:text="Título"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Estado"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/textScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Score: 80"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Progreso: 10 eps"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tipo: TV"
+            android:textSize="14sp" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/textViewScore"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.8"
-        android:text="8.5"
-        android:textColor="@color/textPrimary"
-        android:gravity="center"
-        android:textSize="14sp" />
-
-    <TextView
-        android:id="@+id/textViewType"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.8"
-        android:text="TV"
-        android:textColor="@color/textPrimary"
-        android:gravity="center"
-        android:textSize="12sp" />
-
-    <ImageView
-        android:id="@+id/buttonOptions"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        android:src="@drawable/ic_more_vert"
-        android:contentDescription="Options"
-        app:tint="@color/textPrimary" />
 </LinearLayout>

@@ -8,18 +8,17 @@
     android:background="@color/background"
     tools:context=".ui.MainActivity">
 
-    <!-- Contenedor para los fragments -->
+    <!-- Contenedor de fragments -->
     <FrameLayout
         android:id="@+id/frame_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Toolbar personalizada -->
+    <!-- Toolbar superior -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="85dp"
-        android:layout_marginTop="0dp"
         android:background="@color/primary">
 
         <RelativeLayout
@@ -28,7 +27,7 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
 
-            <!-- Logo (izquierda) -->
+            <!-- Logo -->
             <ImageView
                 android:id="@+id/logoImage"
                 android:layout_width="100dp"
@@ -38,7 +37,7 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/logo_yomitrack" />
 
-            <!-- Icono de perfil en la AppBar (circular) -->
+            <!-- Icono de perfil -->
             <ImageView
                 android:id="@+id/profileIconToolbar"
                 android:layout_width="48dp"
@@ -53,7 +52,7 @@
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- BottomNavigationView (fuera del BottomAppBar) -->
+    <!-- Navegación inferior -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"

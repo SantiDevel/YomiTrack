@@ -6,10 +6,10 @@
     <color name="gray">#808080</color>
     <color name="activeTint">#F26D50</color> <!-- estilo AniList -->
 
-    <!-- Colores por estado -->
-    <color name="statWatching">#3db4f2</color>
-    <color name="statCompleted">#16c98d</color>
-    <color name="statOnHold">#f5a623</color>
-    <color name="statDropped">#f45b69</color>
-    <color name="statPlanToWatch">#c678dd</color>
+    <!-- Colores por estado anime -->
+    <color name="status_completed">#4CAF50</color> <!-- verde -->
+    <color name="status_watching">#2196F3</color>  <!-- azul -->
+    <color name="status_paused">#FFC107</color>    <!-- amarillo -->
+    <color name="status_dropped">#F44336</color>   <!-- rojo -->
+    <color name="status_planning">#9E9E9E</color>  <!-- gris -->
 </resources>

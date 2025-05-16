@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Agregado el permiso de Internet -->
+    <!-- Permiso para internet si tu app lo requiere -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -14,16 +14,29 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.YomiTrack"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
+
+
+    <!-- PANTALLA INICIAL: SplashActivity -->
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.fragments.login.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- LOGIN: alojará login y registro -->
+        <activity
+            android:name=".ui.fragments.login.LoginActivity"
+            android:exported="false" />
+
+        <!-- APP PRINCIPAL: BottomNavigationView -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

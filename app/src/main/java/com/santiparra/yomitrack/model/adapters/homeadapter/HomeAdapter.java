@@ -17,7 +17,7 @@ import java.util.List;
 public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<ItemModel> itemList;
-    private String sectionTitle; // Para saber si es Airing o no
+    private String sectionTitle;
 
     private static final int TYPE_AIRING = 0;
     private static final int TYPE_ANIME_MANGA = 1;

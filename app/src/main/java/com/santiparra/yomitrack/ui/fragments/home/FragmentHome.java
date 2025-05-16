@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Fragmento principal que muestra secciones de anime/manga y actividad reciente.
+ */
 public class FragmentHome extends Fragment {
 
     private final List<RecentActivityModel> fullRecentActivity = new ArrayList<>();
@@ -36,13 +39,14 @@ public class FragmentHome extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Secciones principales
+        // region Secciones de contenido (Airing, En progreso...)
         RecyclerView mainRecyclerView = view.findViewById(R.id.mainRecyclerView);
         mainRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         List<String> sectionTitles = Arrays.asList("Airing", "Anime in Progress", "Manga in Progress");
         Map<String, List<ItemModel>> sectionItems = new HashMap<>();
 
+        // Datos simulados de ejemplo
         sectionItems.put("Airing", Arrays.asList(
                 new ItemModel("Naruto", "5/220", "https://i.imgur.com/qzWZbL2.jpg", ItemModel.ContentType.ANIME),
                 new ItemModel("Bleach", "100/366", "https://i.imgur.com/I0d1HyA.jpg", ItemModel.ContentType.ANIME),
@@ -55,40 +59,26 @@ public class FragmentHome extends Fragment {
         sectionItems.put("Anime in Progress", Arrays.asList(
                 new ItemModel("Attack on Titan", "16/25", "https://i.imgur.com/z4d4kWk.jpg", ItemModel.ContentType.ANIME),
                 new ItemModel("Jujutsu Kaisen", "10/24", "https://i.imgur.com/lWhD6Zc.jpg", ItemModel.ContentType.ANIME),
-                new ItemModel("One Piece", "900/1100", "https://i.imgur.com/VgVfG6K.jpg", ItemModel.ContentType.ANIME),
-                new ItemModel("Boruto", "10/100", "https://i.imgur.com/lWhD6Zc.jpg", ItemModel.ContentType.ANIME),
-                new ItemModel("Dragon Ball", "80/150", "https://i.imgur.com/z4d4kWk.jpg", ItemModel.ContentType.ANIME),
-                new ItemModel("Another", "2/12", "https://i.imgur.com/z4d4kWk.jpg", ItemModel.ContentType.ANIME)
+                new ItemModel("One Piece", "900/1100", "https://i.imgur.com/VgVfG6K.jpg", ItemModel.ContentType.ANIME)
         ));
 
         sectionItems.put("Manga in Progress", Arrays.asList(
                 new ItemModel("Chainsaw Man", "45/100", "https://i.imgur.com/7tZ0h8R.jpg", ItemModel.ContentType.MANGA),
-                new ItemModel("Berserk", "370/380", "https://i.imgur.com/8FJYYHo.jpg", ItemModel.ContentType.MANGA),
-                new ItemModel("One Piece", "900/1100", "https://i.imgur.com/VgVfG6K.jpg", ItemModel.ContentType.ANIME),
-                new ItemModel("Boruto", "10/100", "https://i.imgur.com/lWhD6Zc.jpg", ItemModel.ContentType.ANIME),
-                new ItemModel("Dragon Ball", "80/150", "https://i.imgur.com/z4d4kWk.jpg", ItemModel.ContentType.ANIME),
-                new ItemModel("Another", "2/12", "https://i.imgur.com/z4d4kWk.jpg", ItemModel.ContentType.ANIME)
+                new ItemModel("Berserk", "370/380", "https://i.imgur.com/8FJYYHo.jpg", ItemModel.ContentType.MANGA)
         ));
 
         SectionAdapter sectionAdapter = new SectionAdapter(sectionTitles, sectionItems);
         mainRecyclerView.setAdapter(sectionAdapter);
+        // endregion
 
-        // Actividades recientes
+        // region Actividad reciente
         RecyclerView activityRecyclerView = view.findViewById(R.id.activityRecyclerView);
         activityRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         fullRecentActivity.addAll(Arrays.asList(
                 new RecentActivityModel("Midca", "Read chapters 1 - 60 of", "Choujun! Choujou Senpai", "4 minutes ago", "https://i.imgur.com/7tZ0h8R.jpg"),
-                new RecentActivityModel("prtrncyon", "Scored 9/10 on", "Chainsaw Man", "12 hours ago", "https://cdn.myanimelist.net/images/manga/2/253146.jpg"),
-                new RecentActivityModel("BtwIsSanti", "Watched episode 7 of", "Fate/Zero", "1 day ago", "https://cdn.myanimelist.net/images/anime/5/73245.jpg"),
-                new RecentActivityModel("Taku", "Watched episode 3 of", "Mob Psycho 100", "2 days ago", "https://i.imgur.com/I0d1HyA.jpg"),
-                new RecentActivityModel("Maki", "Read chapter 14 of", "Blue Period", "4 days ago", "https://i.imgur.com/z4d4kWk.jpg"),
-                new RecentActivityModel("Yato", "Scored 10/10 on", "Noragami", "5 days ago", "https://i.imgur.com/8FJYYHo.jpg"),
-                new RecentActivityModel("Eri", "Completed", "My Dress-Up Darling", "6 days ago", "https://i.imgur.com/qzWZbL2.jpg"),
-                new RecentActivityModel("Yuji", "Watched episode 6 of", "Jujutsu Kaisen", "7 days ago", "https://i.imgur.com/lWhD6Zc.jpg"),
-                new RecentActivityModel("Light", "Scored 10/10 on", "Death Note", "8 days ago", "https://i.imgur.com/I0d1HyA.jpg"),
-                new RecentActivityModel("Luffy", "Watched episode 1000 of", "One Piece", "9 days ago", "https://i.imgur.com/VgVfG6K.jpg"),
-                new RecentActivityModel("Gon", "Started watching", "Hunter x Hunter", "10 days ago", "https://i.imgur.com/z4d4kWk.jpg")
+                new RecentActivityModel("prtrncyon", "Scored 9/10 on", "Chainsaw Man", "12 hours ago", "https://cdn.myanimelist.net/images/manga/2/253146.jpg")
+                // ... más datos simulados aquí
         ));
 
         visibleRecentActivity.addAll(fullRecentActivity.subList(0, Math.min(10, fullRecentActivity.size())));
@@ -98,6 +88,7 @@ public class FragmentHome extends Fragment {
         Button buttonShowMore = view.findViewById(R.id.buttonShowMoreActivity);
         Button buttonShowLess = view.findViewById(R.id.buttonShowLessActivity);
 
+        // Mostrar más/menos actividad
         if (fullRecentActivity.size() > 10) {
             buttonShowMore.setVisibility(View.VISIBLE);
             buttonShowLess.setVisibility(View.GONE);
@@ -121,5 +112,6 @@ public class FragmentHome extends Fragment {
             buttonShowMore.setVisibility(View.GONE);
             buttonShowLess.setVisibility(View.GONE);
         }
+        // endregion
     }
 }

@@ -1,166 +1,140 @@
 package com.santiparra.yomitrack.ui.fragments.profile;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.santiparra.yomitrack.R;
-import com.santiparra.yomitrack.model.UserStats;
-import com.santiparra.yomitrack.utils.StatsHelper;
+import com.santiparra.yomitrack.api.ApiClient;
+import com.santiparra.yomitrack.api.ApiService;
+import com.santiparra.yomitrack.db.entities.AnimeEntity;
+import com.santiparra.yomitrack.db.entities.MangaEntity;
 
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FragmentProfile extends Fragment {
 
-    public FragmentProfile() {
-    }
+    private TextView textUsername;
+    private LinearLayout animeStatsContainer, mangaStatsContainer;
+    private ApiService api;
+    private int userId;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        textUsername = view.findViewById(R.id.usernameText);
+        animeStatsContainer = view.findViewById(R.id.animeStatsContainer);
+        mangaStatsContainer = view.findViewById(R.id.mangaStatsContainer);
+        api = ApiClient.getClient().create(ApiService.class);
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        userId = prefs.getInt("current_user_id", -1);
+
+        if (userId == -1) {
+            textUsername.setText("Invitado");
+            Toast.makeText(getContext(), "Estadísticas no disponibles en modo invitado", Toast.LENGTH_SHORT).show();
+            return view;
+        }
+
+        textUsername.setText("Usuario #" + userId);
+
+        loadStats();
+
+        return view;
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    private void loadStats() {
+        animeStatsContainer.removeAllViews();
+        mangaStatsContainer.removeAllViews();
 
-        TextView usernameText = view.findViewById(R.id.usernameText);
-        TextView descriptionText = view.findViewById(R.id.profileDescriptionText);
-        TextView seeMore = view.findViewById(R.id.textViewSeeMore);
-        LinearLayout statsContainer = view.findViewById(R.id.animeStatsContainer);
+        api.getAnimeByUser(userId).enqueue(new Callback<List<AnimeEntity>>() {
+            @Override
+            public void onResponse(Call<List<AnimeEntity>> call, Response<List<AnimeEntity>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    showStats(animeStatsContainer, "Anime", countByStatus(response.body()));
+                }
+            }
 
-        usernameText.setText("BtwIsSanti");
-        descriptionText.setText("Eiko is my waifu right now. Mai and Mikasa is my second wife. Long live anime.");
-
-
-        seeMore.setOnClickListener(v -> {
-            if (descriptionText.getMaxLines() == 2) {
-                descriptionText.setMaxLines(Integer.MAX_VALUE);
-                descriptionText.setEllipsize(null);
-                seeMore.setText("Ver menos");
-            } else {
-                descriptionText.setMaxLines(2);
-                descriptionText.setEllipsize(TextUtils.TruncateAt.END);
-                seeMore.setText("Ver más");
+            @Override
+            public void onFailure(Call<List<AnimeEntity>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error al cargar anime", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Cargar estadísticas simuladas
-        List<UserStats> statsList = StatsHelper.getAnimeStats();
-
-        for (UserStats stat : statsList) {
-            View statView = LayoutInflater.from(getContext())
-                    .inflate(R.layout.item_stat_bar, statsContainer, false);
-
-            TextView label = statView.findViewById(R.id.statLabelFull);
-            ProgressBar bar = statView.findViewById(R.id.statProgressBar);
-
-            label.setText(stat.getCategory() + " • " + stat.getCount());
-            bar.setProgress(stat.getPercentage());
-
-            // Aplicar color distinto por categoría
-            int colorRes = R.color.primary; // default
-            switch (stat.getCategory()) {
-                case "Watching":
-                    colorRes = R.color.statWatching;
-                    break;
-                case "Completed":
-                    colorRes = R.color.statCompleted;
-                    break;
-                case "On Hold":
-                    colorRes = R.color.statOnHold;
-                    break;
-                case "Dropped":
-                    colorRes = R.color.statDropped;
-                    break;
-                case "Plan to Watch":
-                    colorRes = R.color.statPlanToWatch;
-                    break;
+        api.getMangaByUser(userId).enqueue(new Callback<List<MangaEntity>>() {
+            @Override
+            public void onResponse(Call<List<MangaEntity>> call, Response<List<MangaEntity>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    showStats(mangaStatsContainer, "Manga", countByStatus(response.body()));
+                }
             }
 
-            bar.setProgressTintList(ContextCompat.getColorStateList(requireContext(), colorRes));
-            statsContainer.addView(statView);
+            @Override
+            public void onFailure(Call<List<MangaEntity>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error al cargar manga", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private Map<String, Integer> countByStatus(List<?> items) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (Object item : items) {
+            String status = "";
+            if (item instanceof AnimeEntity) {
+                status = ((AnimeEntity) item).getStatus();
+            } else if (item instanceof MangaEntity) {
+                status = ((MangaEntity) item).getStatus();
+            }
+            counts.put(status, counts.getOrDefault(status, 0) + 1);
         }
+        return counts;
+    }
 
-        // Agregar tarjetas de actividad (opcional)
-        LinearLayout activityContainer = view.findViewById(R.id.activityContainer);
+    private void showStats(LinearLayout container, String category, Map<String, Integer> data) {
+        TextView title = new TextView(getContext());
+        title.setText(category.toUpperCase());
+        title.setTextSize(18);
+        title.setPadding(0, 24, 0, 12);
+        container.addView(title);
 
-        if (activityContainer != null) {
-            // Lista simulada de updates
-            String[] activities = {
-                    "Watched episode 5 of Kakushite! Makina-san!!",
-                    "Watched episode 5 of Chotto dake Ai ga Omo...",
-                    "Watched episode 4 of Go-Toubun no Hanayome",
-                    "Watched episode 3 of Kanojo, Okarishimasu",
-                    "Watched episode 12 of Jujutsu Kaisen",
-                    "Watched episode 8 of Bleach: TYBW",
-                    "Watched episode 1 of Chainsaw Man",
-                    "Watched episode 10 of Dr. Stone",
-                    "Watched episode 9 of Mushoku Tensei",
-                    "Watched episode 11 of Ousama Ranking",
-                    "Watched episode 7 of HUNTER×HUNTER"
-            };
+        int total = 0;
+        for (int count : data.values()) total += count;
 
-            int limit = Math.min(10, activities.length);
+        for (Map.Entry<String, Integer> entry : data.entrySet()) {
+            String status = entry.getKey();
+            int count = entry.getValue();
+            int percent = (int) ((count / (float) total) * 100);
 
-            for (int i = 0; i < limit; i++) {
-                View card = LayoutInflater.from(getContext())
-                        .inflate(R.layout.item_activity, activityContainer, false);
+            TextView label = new TextView(getContext());
+            label.setText(status + ": " + count + " (" + percent + "%)");
+            label.setTextSize(16);
+            container.addView(label);
 
-                TextView text = card.findViewById(R.id.activityText);
-                TextView time = card.findViewById(R.id.activityTime);
-
-                text.setText(activities[i]);
-                time.setText("16 hours ago");
-
-                activityContainer.addView(card);
-            }
-        }
-
-        // Estadísticas de manga
-        LinearLayout mangaStatsContainer = view.findViewById(R.id.mangaStatsContainer);
-        List<UserStats> mangaStats = StatsHelper.getMangaStats();
-
-        for (UserStats stat : mangaStats) {
-            View statView = LayoutInflater.from(getContext())
-                    .inflate(R.layout.item_stat_bar, mangaStatsContainer, false);
-
-            TextView label = statView.findViewById(R.id.statLabelFull);
-            ProgressBar bar = statView.findViewById(R.id.statProgressBar);
-
-            label.setText(stat.getCategory() + " • " + stat.getCount());
-            bar.setProgress(stat.getPercentage());
-
-            int colorRes = R.color.primary;
-            switch (stat.getCategory()) {
-                case "Reading":
-                    colorRes = R.color.statWatching;
-                    break;
-                case "Completed":
-                    colorRes = R.color.statCompleted;
-                    break;
-                case "On Hold":
-                    colorRes = R.color.statOnHold;
-                    break;
-                case "Dropped":
-                    colorRes = R.color.statDropped;
-                    break;
-                case "Plan to Read":
-                    colorRes = R.color.statPlanToWatch;
-                    break;
-            }
-
-            bar.setProgressTintList(ContextCompat.getColorStateList(requireContext(), colorRes));
-            mangaStatsContainer.addView(statView);
+            ProgressBar progress = new ProgressBar(getContext(), null, android.R.attr.progressBarStyleHorizontal);
+            progress.setMax(100);
+            progress.setProgress(percent);
+            progress.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            container.addView(progress);
         }
     }
 }

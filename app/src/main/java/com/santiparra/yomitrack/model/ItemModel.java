@@ -1,18 +1,20 @@
-package com.santiparra.yomitrack.model; // Ajusta el paquete si necesitas
+package com.santiparra.yomitrack.model;
 
+/**
+ * Modelo general de ítem para mostrar en secciones del home.
+ * Se usa tanto para anime como manga.
+ */
 public class ItemModel {
-
     private String title;
     private String progress;
     private String imageUrl;
-    private ContentType contentType; // Anime o Manga
+    private ContentType contentType;
 
     public enum ContentType {
         ANIME,
         MANGA
     }
 
-    // Constructor completo
     public ItemModel(String title, String progress, String imageUrl, ContentType contentType) {
         this.title = title;
         this.progress = progress;
@@ -20,7 +22,6 @@ public class ItemModel {
         this.contentType = contentType;
     }
 
-    // Getters
     public String getTitle() {
         return title;
     }
@@ -37,7 +38,6 @@ public class ItemModel {
         return contentType;
     }
 
-    // Setters (opcional si quieres mutar los datos después)
     public void setTitle(String title) {
         this.title = title;
     }

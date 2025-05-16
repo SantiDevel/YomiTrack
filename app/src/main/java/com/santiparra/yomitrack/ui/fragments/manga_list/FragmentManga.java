@@ -1,174 +1,115 @@
 package com.santiparra.yomitrack.ui.fragments.manga_list;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.santiparra.yomitrack.R;
-import com.santiparra.yomitrack.model.AnimeItem;
+import com.santiparra.yomitrack.api.ApiClient;
+import com.santiparra.yomitrack.api.ApiService;
+import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.model.adapters.manga_adapter.MangaAdapter;
+import com.santiparra.yomitrack.ui.fragments.addmanga.AddMangaFragment;
+import com.santiparra.yomitrack.ui.fragments.editmanga.EditMangaFragment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FragmentManga extends Fragment {
+
     private RecyclerView recyclerView;
-    private EditText editTextFilter;
-    private TextView textViewTitle;
     private MangaAdapter adapter;
+    private ApiService api;
+    private int currentViewType = MangaAdapter.VIEW_NORMAL;
+    private int userId = 1; // Deberías usar SharedPreferences si tienes login
 
-    private final List<AnimeItem> fullMangaList = new ArrayList<>();
-    private final List<AnimeItem> filteredMangaList = new ArrayList<>();
-    private String currentStatus = "Reading";
-    private int currentViewMode = 0;
-
-    private ImageButton buttonGrid, buttonLarge, buttonList;
-
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_alist, container, false);
+        View view = inflater.inflate(R.layout.fragment_mlist, container, false);
 
-        recyclerView = view.findViewById(R.id.recyclerViewAnimeList);
-        editTextFilter = view.findViewById(R.id.editTextFilter);
-        textViewTitle = view.findViewById(R.id.textViewWatching);
-        ImageView buttonFilterMenu = view.findViewById(R.id.buttonFilterMenu);
-        buttonGrid = view.findViewById(R.id.buttonViewGrid);
-        buttonLarge = view.findViewById(R.id.buttonViewLarge);
-        buttonList = view.findViewById(R.id.buttonViewList);
+        recyclerView = view.findViewById(R.id.recyclerViewManga);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        buttonGrid.setOnClickListener(v -> setLayoutMode(0));
-        buttonLarge.setOnClickListener(v -> setLayoutMode(1));
-        buttonList.setOnClickListener(v -> setLayoutMode(2));
+        ImageView changeViewButton = view.findViewById(R.id.buttonChangeViewType);
+        FloatingActionButton fabAdd = view.findViewById(R.id.fabAddManga);
 
-        initSampleMangaList();
+        api = ApiClient.getClient().create(ApiService.class);
 
-        filteredMangaList.addAll(fullMangaList);
-        adapter = new MangaAdapter(getContext(), filteredMangaList);
-        recyclerView.setAdapter(adapter);
-        adapter.setOnMangaRemoveListener(manga -> fullMangaList.remove(manga));
-
-        editTextFilter.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void afterTextChanged(Editable s) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterMangaList(s.toString());
-            }
+        changeViewButton.setOnClickListener(v -> {
+            currentViewType = (currentViewType + 1) % 3;
+            if (adapter != null) adapter.setViewType(currentViewType);
         });
 
-        Map<Integer, String> filterMap = new HashMap<>();
-        filterMap.put(R.id.filter_all, "All");
-        filterMap.put(R.id.filter_watching, "Reading");
-        filterMap.put(R.id.filter_planning, "Planning");
-        filterMap.put(R.id.filter_paused, "Paused");
-        filterMap.put(R.id.filter_dropped, "Dropped");
-        filterMap.put(R.id.filter_completed, "Completed");
+        fabAdd.setOnClickListener(v -> requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_layout, new AddMangaFragment())
+                .addToBackStack(null)
+                .commit());
 
-        buttonFilterMenu.setOnClickListener(v -> {
-            PopupMenu popup = new PopupMenu(requireContext(), buttonFilterMenu);
-            popup.inflate(R.menu.filter_list_menu);
-            popup.setOnMenuItemClickListener(item -> {
-                String selectedStatus = filterMap.get(item.getItemId());
-                if (selectedStatus != null) {
-                    currentStatus = selectedStatus;
-                    textViewTitle.setText(currentStatus);
-                    filterMangaList(editTextFilter.getText().toString());
-                    return true;
-                }
-                return false;
-            });
-            popup.show();
-        });
-
-        setLayoutMode(currentViewMode);
+        loadMangaList();
 
         return view;
     }
 
-    private void filterMangaList(String query) {
-        filteredMangaList.clear();
-        int count = 0;
-        for (AnimeItem manga : fullMangaList) {
-            boolean matchesStatus = currentStatus.equals("All") || manga.getStatus().equalsIgnoreCase(currentStatus);
-            boolean matchesQuery = manga.getTitle().toLowerCase().contains(query.toLowerCase());
-            if (matchesStatus && matchesQuery) {
-                filteredMangaList.add(manga);
-                count++;
-                if (count >= 10) {
-                    Toast.makeText(requireContext(), "Mostrando los primeros 10 resultados", Toast.LENGTH_SHORT).show();
-                    break;
+    private void loadMangaList() {
+        api.getMangaByUser(userId).enqueue(new Callback<List<MangaEntity>>() {
+            @Override
+            public void onResponse(Call<List<MangaEntity>> call, Response<List<MangaEntity>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    adapter = new MangaAdapter(response.body(), currentViewType,
+                            FragmentManga.this::showEditDialog,
+                            FragmentManga.this::deleteManga);
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    Toast.makeText(getContext(), "Error al cargar la lista", Toast.LENGTH_SHORT).show();
                 }
             }
-        }
-        adapter.notifyDataSetChanged();
+
+            @Override
+            public void onFailure(Call<List<MangaEntity>> call, Throwable t) {
+                Toast.makeText(getContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void setLayoutMode(int mode) {
-        currentViewMode = mode;
-
-        if (mode == 2) {
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        } else if (mode == 1) {
-            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
-        } else if (mode == 0) {
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        }
-
-        adapter = new MangaAdapter(getContext(), filteredMangaList);
-        adapter.setViewMode(mode);
-        adapter.setOnMangaRemoveListener(manga -> fullMangaList.remove(manga));
-        recyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-
-        int defaultTint = ContextCompat.getColor(requireContext(), R.color.textPrimary);
-        int activeTint = ContextCompat.getColor(requireContext(), R.color.activeTint);
-
-        buttonGrid.setColorFilter(mode == 0 ? activeTint : defaultTint);
-        buttonLarge.setColorFilter(mode == 1 ? activeTint : defaultTint);
-        buttonList.setColorFilter(mode == 2 ? activeTint : defaultTint);
+    private void showEditDialog(MangaEntity manga) {
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_layout, new EditMangaFragment(manga))
+                .addToBackStack(null)
+                .commit();
     }
 
-    private void initSampleMangaList() {
-        fullMangaList.clear();
-        fullMangaList.add(new AnimeItem("Chainsaw Man", "https://cdn.example.com/img1.jpg", 45, 100, 8.5, "Manga", "Reading"));
-        fullMangaList.add(new AnimeItem("Berserk", "https://cdn.example.com/img2.jpg", 370, 380, 9.4, "Manga", "Paused"));
-        fullMangaList.add(new AnimeItem("One Piece", "https://cdn.example.com/img3.jpg", 1090, 1200, 9.8, "Manga", "Reading"));
-        fullMangaList.add(new AnimeItem("Attack on Titan", "https://cdn.example.com/img4.jpg", 139, 139, 9.5, "Manga", "Completed"));
-        fullMangaList.add(new AnimeItem("Solo Leveling", "https://cdn.example.com/img5.jpg", 179, 179, 8.9, "Manhwa", "Completed"));
-    }
+    private void deleteManga(MangaEntity manga) {
+        api.deleteManga(manga.getId()).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Manga eliminado", Toast.LENGTH_SHORT).show();
+                    loadMangaList();
+                } else {
+                    Toast.makeText(getContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
+                }
+            }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("currentStatus", currentStatus);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            currentStatus = savedInstanceState.getString("currentStatus", "Reading");
-            textViewTitle.setText(currentStatus);
-            filterMangaList(editTextFilter.getText().toString());
-        }
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(getContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
