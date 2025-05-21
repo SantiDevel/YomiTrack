@@ -1,7 +1,6 @@
-// MangaAdapter.java actualizado con statusDot dinámico
-
 package com.santiparra.yomitrack.model.adapters.manga_adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,11 +37,6 @@ public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHol
         this.onLongClick = onLongClick;
     }
 
-    public void setViewType(int viewType) {
-        this.viewType = viewType;
-        notifyDataSetChanged();
-    }
-
     @NonNull
     @Override
     public MangaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -71,7 +65,8 @@ public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHol
         }
 
         if (holder.textProgress != null) {
-            holder.textProgress.setText(manga.getProgress() + " caps");
+            String progress = manga.getProgress() + " caps";
+            holder.textProgress.setText(progress);
         }
 
         if (holder.textScore != null) {
@@ -97,7 +92,7 @@ public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHol
                 case "Completed":
                     colorResId = R.color.status_completed;
                     break;
-                case "Reading":
+                case "Watching":
                     colorResId = R.color.status_watching;
                     break;
                 case "Paused":
@@ -154,6 +149,11 @@ public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHol
             textType = itemView.findViewById(R.id.textType);
             statusDot = itemView.findViewById(R.id.statusDot);
         }
+    }
+
+    public void updateList(List<MangaEntity> newList) {
+        this.mangaList = newList;
+        notifyDataSetChanged();
     }
 
     public interface OnMangaClickListener {

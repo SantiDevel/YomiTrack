@@ -3,9 +3,15 @@ package com.santiparra.yomitrack.api;
 import com.santiparra.yomitrack.db.entities.AnimeEntity;
 import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.db.entities.UserEntity;
-import com.santiparra.yomitrack.model.AniListAnime;
+import com.santiparra.yomitrack.model.AniListMedia;
+import com.santiparra.yomitrack.model.AnimePageResponse;
 import com.santiparra.yomitrack.model.LoginResponse;
+import com.santiparra.yomitrack.model.MangaPageResponse;
 import com.santiparra.yomitrack.model.RegisterResponse;
+import com.santiparra.yomitrack.model.UserStatsResponse;
+import com.santiparra.yomitrack.utils.ActivityLog;
+
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +29,7 @@ public interface ApiService {
 
     // ---------------- Usuario ----------------
     @POST("users/register")
-    Call<RegisterResponse> registerUser(@Body Map<String, String> request);
+    Call<RegisterResponse> registerUser(@Body UserEntity user);
     @POST("users/login")
     Call<LoginResponse> loginUser(@Body UserEntity user);
 
@@ -33,6 +39,14 @@ public interface ApiService {
 
     @GET("anime/list/{userId}")
     Call<List<AnimeEntity>> getAnimeByUser(@Path("userId") int userId);
+
+    // Scroll infinito: obtener lista paginada
+    @GET("/anime/list/{userId}")
+    Call<AnimePageResponse> getAnimes(
+            @Path("userId") int userId,
+            @Query("page") int page,
+            @Query("size") int size
+    );
 
     @PUT("anime/{id}")
     Call<String> updateAnime(@Path("id") int animeId, @Body AnimeEntity anime);
@@ -47,16 +61,33 @@ public interface ApiService {
     @GET("manga/list/{userId}")
     Call<List<MangaEntity>> getMangaByUser(@Path("userId") int userId);
 
+    @GET("/manga/list/{userId}")
+    Call<MangaPageResponse> getMangas(
+            @Path("userId") int userId,
+            @Query("page") int page,
+            @Query("size") int size
+    );
+
     @PUT("manga/{id}")
     Call<String> updateManga(@Path("id") int mangaId, @Body MangaEntity manga);
 
     @DELETE("manga/delete/{id}")
     Call<String> deleteManga(@Path("id") int id);
 
-    // ---------------- AniList API ----------------
-    @GET("/anilist/search")
-    Call<List<AniListAnime>> searchAnimeAniList(@Query("query") String query);
+    // ---------------- Activity -------------------
 
-    @GET("anilist/search/manga")
-    Call<List<AniListAnime>> searchMangaAniList(@Query("query") String query);
+    @GET("user/{id}/stats")
+    Call<Map<String, Map<String, Integer>>> getUserStats(@Path("id") int userId);
+
+    @GET("api/activity/list/{userId}")
+    Call<List<ActivityLog>> getActivityLog(@Path("userId") int userId);
+    @POST("activity/add")
+    Call<JSONObject> postActivity(@Body Map<String, Object> body);
+
+
+    // ---------------- AniList API ----------------
+
+    @GET("anilist/search")
+    Call<List<AniListMedia>> searchAniList(@Query("query") String query, @Query("type") String type);
+
 }

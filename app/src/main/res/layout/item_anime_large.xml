@@ -8,9 +8,9 @@
         android:id="@+id/imageCover"
         android:layout_width="match_parent"
         android:layout_height="240dp"
-        android:scaleType="centerCrop"
         android:background="@drawable/rectangle_placeholder"
-        android:contentDescription="Portada" />
+        android:contentDescription="Portada"
+        android:scaleType="centerCrop" />
 
     <!-- Progreso en esquina inferior izquierda -->
     <TextView
@@ -19,11 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="6dp"
+        android:background="@android:color/transparent"
         android:text="6/12"
         android:textColor="#FF4444"
-        android:textStyle="bold"
         android:textSize="14sp"
-        android:background="@android:color/transparent" />
+        android:textStyle="bold" />
 
     <!-- Título con fondo oscuro -->
     <TextView
@@ -32,12 +32,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="#99000000"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:padding="6dp"
         android:text="Nombre del Anime"
         android:textColor="@android:color/white"
-        android:textSize="14sp"
-        android:padding="6dp"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:textSize="14sp" />
 
     <!-- Indicador de estado (ej: Watching) -->
     <View

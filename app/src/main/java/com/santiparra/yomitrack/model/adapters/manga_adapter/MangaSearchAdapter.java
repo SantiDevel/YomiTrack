@@ -11,25 +11,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.santiparra.yomitrack.R;
-import com.santiparra.yomitrack.model.AniListAnime;
+import com.santiparra.yomitrack.model.AniListMedia;
 
 import java.util.List;
 
 public class MangaSearchAdapter extends RecyclerView.Adapter<MangaSearchAdapter.SearchViewHolder> {
 
-    private List<AniListAnime> mangaList;
+    private List<AniListMedia> mangaList;
     private final OnMangaClickListener clickListener;
 
     public interface OnMangaClickListener {
-        void onClick(AniListAnime manga);
+        void onClick(AniListMedia manga);
     }
 
-    public MangaSearchAdapter(List<AniListAnime> mangaList, OnMangaClickListener clickListener) {
+    public MangaSearchAdapter(List<AniListMedia> mangaList, OnMangaClickListener clickListener) {
         this.mangaList = mangaList;
         this.clickListener = clickListener;
     }
 
-    public void setMangaList(List<AniListAnime> mangaList) {
+    public void setMangaList(List<AniListMedia> mangaList) {
         this.mangaList = mangaList;
         notifyDataSetChanged();
     }
@@ -43,7 +43,7 @@ public class MangaSearchAdapter extends RecyclerView.Adapter<MangaSearchAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
-        AniListAnime manga = mangaList.get(position);
+        AniListMedia manga = mangaList.get(position);
         holder.title.setText(manga.getTitle());
 
         Glide.with(holder.itemView.getContext())

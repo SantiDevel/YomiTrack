@@ -29,18 +29,10 @@ public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.AnimeViewHol
     private final OnAnimeClickListener onEditClick;
     private final OnAnimeClickListener onLongClick;
 
-    // ✅ Constructor optimizado para uso simple
-    public AnimeAdapter(Context context) {
-        this.animeList = new ArrayList<>();
-        this.viewType = VIEW_NORMAL;
-        this.onEditClick = null;
-        this.onLongClick = null;
-    }
-
     public AnimeAdapter(List<AnimeEntity> animeList, int viewType,
                         OnAnimeClickListener onEditClick,
                         OnAnimeClickListener onLongClick) {
-        this.animeList = animeList;
+        this.animeList = animeList != null ? animeList : new ArrayList<>();
         this.viewType = viewType;
         this.onEditClick = onEditClick;
         this.onLongClick = onLongClick;
@@ -48,6 +40,11 @@ public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.AnimeViewHol
 
     public void setViewType(int viewType) {
         this.viewType = viewType;
+        notifyDataSetChanged();
+    }
+
+    public void updateList(List<AnimeEntity> newList) {
+        this.animeList = newList != null ? newList : new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -165,14 +162,7 @@ public class AnimeAdapter extends RecyclerView.Adapter<AnimeAdapter.AnimeViewHol
         }
     }
 
-    public void updateList(List<AnimeEntity> newList) {
-        this.animeList = newList;
-        notifyDataSetChanged();
-    }
-
-
     public interface OnAnimeClickListener {
         void onClick(AnimeEntity anime);
     }
-
 }

@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +26,7 @@ import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.AnimeEntity;
+import com.santiparra.yomitrack.model.AnimePageResponse;
 import com.santiparra.yomitrack.model.adapters.anime_adapter.AnimeAdapter;
 import com.santiparra.yomitrack.ui.fragments.addanime.AddAnimeFragment;
 import com.santiparra.yomitrack.ui.fragments.editanime.EditAnimeFragment;
@@ -45,7 +48,11 @@ public class FragmentAnime extends Fragment {
 
     private ImageButton btnViewCompact, btnViewNormal, btnViewLarge;
     private int currentViewType = AnimeAdapter.VIEW_NORMAL;
-    private List<AnimeEntity> animeList = new ArrayList<>();
+    private final List<AnimeEntity> animeList = new ArrayList<>();
+
+    private boolean isLoading = false;
+    private int currentPage = 1;
+    private final int PAGE_SIZE = 20;
 
     @Nullable
     @Override
@@ -68,26 +75,25 @@ public class FragmentAnime extends Fragment {
 
         editSearch = view.findViewById(R.id.editSearch);
         editSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filterAnimeList(s.toString());
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
+            @Override public void afterTextChanged(Editable s) {}
         });
 
         api = ApiClient.getClient().create(ApiService.class);
-        SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        userId = prefs.getInt("current_user_id", -1);
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        userId = prefs.getInt("user_id", -1);
 
-        // Botones de vista
-        btnViewCompact.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_COMPACT));
-        btnViewNormal.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_NORMAL));
-        btnViewLarge.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_LARGE));
+        if (userId == -1) {
+            Toast.makeText(getContext(), "Error: sesión no iniciada", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        adapter = new AnimeAdapter(animeList, currentViewType, this::showEditDialog, this::deleteAnime);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(adapter);
 
         fabAdd.setOnClickListener(v -> requireActivity().getSupportFragmentManager()
                 .beginTransaction()
@@ -95,7 +101,39 @@ public class FragmentAnime extends Fragment {
                 .addToBackStack(null)
                 .commit());
 
-        fetchAnimeList();
+        btnViewCompact.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_COMPACT));
+        btnViewNormal.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_NORMAL));
+        btnViewLarge.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_LARGE));
+
+        setViewType(currentViewType);
+        loadMoreAnimes(currentPage);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager == null) return;
+
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && (firstVisibleItemPosition + visibleItemCount) >= totalItemCount - 4) {
+                    currentPage++;
+                    loadMoreAnimes(currentPage);
+                }
+            }
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            recyclerView.setPadding(
+                    recyclerView.getPaddingLeft(),
+                    recyclerView.getPaddingTop(),
+                    recyclerView.getPaddingRight(),
+                    bottomInset + 95
+            );
+            return insets;
+        });
     }
 
     private void filterAnimeList(String query) {
@@ -108,33 +146,13 @@ public class FragmentAnime extends Fragment {
         adapter.updateList(filtered);
     }
 
-    private void fetchAnimeList() {
-        api.getAnimeByUser(userId).enqueue(new Callback<List<AnimeEntity>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<AnimeEntity>> call,
-                                   @NonNull Response<List<AnimeEntity>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    animeList = response.body();
-                    setViewType(currentViewType);
-                } else {
-                    Toast.makeText(getContext(), "Error al cargar animes", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<AnimeEntity>> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Fallo de conexión", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void setViewType(int viewType) {
         currentViewType = viewType;
 
         if (viewType == AnimeAdapter.VIEW_LARGE) {
-            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         } else {
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         }
 
         adapter = new AnimeAdapter(animeList, viewType,
@@ -155,17 +173,52 @@ public class FragmentAnime extends Fragment {
         api.deleteAnime(anime.getId()).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
+                if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Anime eliminado", Toast.LENGTH_SHORT).show();
-                    fetchAnimeList();
+                    Toast.makeText(requireContext(), "Anime eliminado", Toast.LENGTH_SHORT).show();
+                    currentPage = 1;
+                    animeList.clear();
+                    loadMoreAnimes(currentPage);
                 } else {
-                    Toast.makeText(getContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
-                Toast.makeText(getContext(), "Fallo de conexión", Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), "Fallo de conexión", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void loadMoreAnimes(int page) {
+        isLoading = true;
+
+        api.getAnimes(userId, page, PAGE_SIZE).enqueue(new Callback<AnimePageResponse>() {
+            @Override
+            public void onResponse(Call<AnimePageResponse> call, Response<AnimePageResponse> response) {
+                if (!isAdded()) return;
+
+                if (response.isSuccessful() && response.body() != null) {
+                    List<AnimeEntity> nuevos = response.body().getData();
+                    animeList.addAll(nuevos);
+                    adapter.notifyItemRangeInserted(animeList.size() - nuevos.size(), nuevos.size());
+
+                    isLoading = response.body().isHasNextPage();
+                } else {
+                    isLoading = false;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AnimePageResponse> call, Throwable t) {
+                isLoading = false;
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), "Error al cargar más animes", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

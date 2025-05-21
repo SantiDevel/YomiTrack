@@ -51,4 +51,5 @@
     <item name="buttonSaveAnime" type="id" />
     <item name="statusDot" type="id" />
     <item name="editSearch" type="id" />
+    <item name="animeStatText" type="id" />
 </resources>

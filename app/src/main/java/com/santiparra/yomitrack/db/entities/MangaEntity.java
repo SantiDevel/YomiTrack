@@ -15,37 +15,79 @@ public class MangaEntity implements Serializable {
     private String status;
     private String type;
     private String imageUrl;
+    private int totalChapters;
 
     // Getters y Setters
-    public int getId() { return id; }
 
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public int getUserId() { return userId; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public void setUserId(int userId) { this.userId = userId; }
+    public int getUserId() {
+        return userId;
+    }
 
-    public String getTitle() { return title; }
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
-    public void setTitle(String title) { this.title = title; }
+    public String getTitle() {
+        return title;
+    }
 
-    public int getScore() { return score; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public void setScore(int score) { this.score = score; }
+    public int getScore() {
+        return score;
+    }
 
-    public int getProgress() { return progress; }
+    public void setScore(int score) {
+        this.score = score;
+    }
 
-    public void setProgress(int progress) { this.progress = progress; }
+    public int getProgress() {
+        return progress;
+    }
 
-    public String getStatus() { return status; }
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
 
-    public void setStatus(String status) { this.status = status; }
+    public String getStatus() {
+        return status;
+    }
 
-    public String getType() { return type; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public void setType(String type) { this.type = type; }
+    public String getType() {
+        return type;
+    }
 
-    public String getImageUrl() { return imageUrl; }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public int getTotalChapters() {
+        return totalChapters;
+    }
+
+    public void setTotalChapters(int totalChapters) {
+        this.totalChapters = totalChapters;
+    }
 }

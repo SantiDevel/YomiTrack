@@ -1,18 +1,12 @@
-// EditAnimeFragment.java optimizado con setupSpinners y safe saveChanges
-
 package com.santiparra.yomitrack.ui.fragments.editanime;
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,19 +25,24 @@ public class EditAnimeFragment extends Fragment {
 
     private EditText editTextTitle, editTextScore, editTextProgress;
     private Spinner spinnerStatus, spinnerType;
-    private Button buttonSave;
+    private Button buttonSave, buttonDelete;
     private AnimeEntity anime;
     private ApiService api;
-    private int userId;
 
     public EditAnimeFragment(AnimeEntity anime) {
         this.anime = anime;
     }
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_edit_anime, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_edit_anime, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         editTextTitle = view.findViewById(R.id.editTextAnimeTitle);
         editTextScore = view.findViewById(R.id.editTextScore);
@@ -51,51 +50,47 @@ public class EditAnimeFragment extends Fragment {
         spinnerStatus = view.findViewById(R.id.spinnerStatus);
         spinnerType = view.findViewById(R.id.spinnerType);
         buttonSave = view.findViewById(R.id.buttonSaveAnime);
+        buttonDelete = view.findViewById(R.id.buttonDeleteAnime);
 
         api = ApiClient.getClient().create(ApiService.class);
-        SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        userId = prefs.getInt("current_user_id", -1);
 
-        if (getArguments() != null && getArguments().containsKey("anime")) {
-            anime = (AnimeEntity) getArguments().getSerializable("anime");
-            fillFields();
+        // Llenar campos
+        fillFields();
+
+        // Spinner datos
+        String[] statusArray = getResources().getStringArray(R.array.anime_status_array);
+        String[] typeArray = getResources().getStringArray(R.array.anime_type_array);
+
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, statusArray);
+        spinnerStatus.setAdapter(statusAdapter);
+
+        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, typeArray);
+        spinnerType.setAdapter(typeAdapter);
+
+        for (int i = 0; i < statusArray.length; i++) {
+            if (statusArray[i].equalsIgnoreCase(anime.getStatus())) {
+                spinnerStatus.setSelection(i);
+                break;
+            }
         }
 
-        setupSpinners();
+        for (int i = 0; i < typeArray.length; i++) {
+            if (typeArray[i].equalsIgnoreCase(anime.getType())) {
+                spinnerType.setSelection(i);
+                break;
+            }
+        }
 
         buttonSave.setOnClickListener(v -> saveChanges());
 
-        return view;
-    }
-
-    private void setupSpinners() {
-        ArrayAdapter<CharSequence> statusAdapter = ArrayAdapter.createFromResource(
-                requireContext(), R.array.anime_status_array, android.R.layout.simple_spinner_item);
-        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerStatus.setAdapter(statusAdapter);
-
-        ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
-                requireContext(), R.array.anime_type_array, android.R.layout.simple_spinner_item);
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerType.setAdapter(typeAdapter);
-
-        if (anime != null) {
-            String[] statusArray = getResources().getStringArray(R.array.anime_status_array);
-            String[] typeArray = getResources().getStringArray(R.array.anime_type_array);
-
-            for (int i = 0; i < statusArray.length; i++) {
-                if (statusArray[i].equalsIgnoreCase(anime.getStatus())) {
-                    spinnerStatus.setSelection(i);
-                    break;
-                }
-            }
-            for (int i = 0; i < typeArray.length; i++) {
-                if (typeArray[i].equalsIgnoreCase(anime.getType())) {
-                    spinnerType.setSelection(i);
-                    break;
-                }
-            }
-        }
+        buttonDelete.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Eliminar anime")
+                    .setMessage("¿Estás seguro de que quieres eliminar este anime?")
+                    .setPositiveButton("Sí", (dialog, which) -> deleteAnime())
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        });
     }
 
     private void fillFields() {
@@ -128,13 +123,8 @@ public class EditAnimeFragment extends Fragment {
             return;
         }
 
-        String status = spinnerStatus.getSelectedItem() != null ? spinnerStatus.getSelectedItem().toString() : "";
-        String type = spinnerType.getSelectedItem() != null ? spinnerType.getSelectedItem().toString() : "";
-
-        if (status.isEmpty() || type.isEmpty()) {
-            Toast.makeText(requireContext(), "Debe seleccionar estado y tipo", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        String status = spinnerStatus.getSelectedItem().toString();
+        String type = spinnerType.getSelectedItem().toString();
 
         anime.setTitle(title);
         anime.setScore(score);
@@ -142,14 +132,37 @@ public class EditAnimeFragment extends Fragment {
         anime.setStatus(status);
         anime.setType(type);
 
-        api.updateAnime(anime.getId(),anime).enqueue(new Callback<String>() {
+        api.updateAnime(anime.getId(), anime).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(requireContext(), "Anime actualizado", Toast.LENGTH_SHORT).show();
+                    requireContext().getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+                            .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
                     Toast.makeText(requireContext(), "Error al actualizar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void deleteAnime() {
+        api.deleteAnime(anime.getId()).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(requireContext(), "Anime eliminado", Toast.LENGTH_SHORT).show();
+                    requireContext().getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+                            .edit().putBoolean("refresh_profile", true).apply();
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                } else {
+                    Toast.makeText(requireContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
                 }
             }
 

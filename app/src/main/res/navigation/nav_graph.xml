@@ -7,9 +7,9 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.santiparra.yomitrack.ui.fragments.login.LoginFragment"
-        android:label="Login" >
+        android:label="Login">
         <action
-            android:id="@+id/action_login_to_register"
+            android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
     </fragment>
 

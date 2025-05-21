@@ -4,18 +4,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
 import com.santiparra.yomitrack.R;
+import com.santiparra.yomitrack.databinding.FragmentLoginBinding;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.UserEntity;
@@ -26,86 +27,85 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Fragmento que gestiona el inicio de sesión y entrada como invitado.
- */
 public class LoginFragment extends Fragment {
 
-    private EditText usernameEditText, passwordEditText;
-    private Button loginButton, guestButton, registerButton;
+    private FragmentLoginBinding binding;
+
+    public LoginFragment() {
+        // Required empty public constructor
+    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        binding = FragmentLoginBinding.inflate(inflater, container, false);
 
-        usernameEditText = view.findViewById(R.id.editTextUsername);
-        passwordEditText = view.findViewById(R.id.editTextPassword);
-        loginButton = view.findViewById(R.id.buttonLogin);
-        guestButton = view.findViewById(R.id.buttonGuest);
-        registerButton = view.findViewById(R.id.buttonGoRegister);
+        binding.buttonLogin.setOnClickListener(v -> loginUser());
+        binding.buttonGuest.setOnClickListener(v -> loginAsGuest());
+        binding.buttonGoRegister.setOnClickListener(v -> {
+            NavController navController = NavHostFragment.findNavController(LoginFragment.this);
+            navController.navigate(R.id.action_loginFragment_to_registerFragment);
+        });
 
-        loginButton.setOnClickListener(v -> {
-            String username = usernameEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
+        return binding.getRoot();
+    }
 
-            if (username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(getContext(), "Rellena todos los campos", Toast.LENGTH_SHORT).show();
-                return;
+    private void loginUser() {
+        String username = binding.editTextUsername.getText().toString().trim();
+        String password = binding.editTextPassword.getText().toString().trim();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            showToast("Ingrese usuario y contraseña");
+            return;
+        }
+
+        UserEntity user = new UserEntity(username, password);
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+
+        apiService.loginUser(user).enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    saveUserSession(response.body().getUser().getId(), response.body().getUser().getUsername());
+                    showToast("Inicio de sesión exitoso");
+                    goToMainActivity();
+                } else {
+                    showToast("Credenciales incorrectas");
+                }
             }
 
-            ApiService api = ApiClient.getClient().create(ApiService.class);
-            UserEntity user = new UserEntity();
-            user.username = username;
-            user.password = password;
-
-            Call<LoginResponse> call = api.loginUser(user);
-            call.enqueue(new Callback<LoginResponse>() {
-                @Override
-                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        LoginResponse result = response.body();
-
-                        if (result.success) {
-                            UserEntity user = result.user;
-                            Toast.makeText(getContext(), "Bienvenido " + user.username, Toast.LENGTH_SHORT).show();
-
-                            saveSession(user.id); // ✅ Guardamos el ID del usuario
-                            navigateToHome();     // ✅ Entramos a MainActivity
-                        } else {
-                            Toast.makeText(getContext(), result.message, Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(getContext(), "Error inesperado", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
+                showToast("Error de red: " + t.getMessage());
+            }
         });
-
-        guestButton.setOnClickListener(v -> {
-            saveSession(-1); // usuario invitado
-            navigateToHome();
-        });
-
-        registerButton.setOnClickListener(v -> {
-            NavController navController = NavHostFragment.findNavController(LoginFragment.this);
-            navController.navigate(R.id.action_login_to_register);
-        });
-
-        return view;
     }
 
-    private void saveSession(int userId) {
-        SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        prefs.edit().putInt("current_user_id", userId).apply();
+    private void loginAsGuest() {
+        saveUserSession(-1, "Invitado");
+        goToMainActivity();
     }
 
-    private void navigateToHome() {
+    private void saveUserSession(int userId, String username) {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        prefs.edit()
+                .putInt("user_id", userId)
+                .putString("username", username)
+                .apply();
+    }
+
+    private void goToMainActivity() {
         startActivity(new Intent(getActivity(), MainActivity.class));
         requireActivity().finish();
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

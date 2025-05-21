@@ -1,4 +1,4 @@
-// AddAnimeFragment.java actualizado con LinearLayoutManager asignado al RecyclerView
+// AddAnimeFragment.java
 
 package com.santiparra.yomitrack.ui.fragments.addanime;
 
@@ -26,11 +26,13 @@ import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.AnimeEntity;
-import com.santiparra.yomitrack.model.AniListAnime;
+import com.santiparra.yomitrack.model.AniListMedia;
 import com.santiparra.yomitrack.model.adapters.anime_adapter.AnimeSearchAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -92,9 +94,9 @@ public class AddAnimeFragment extends Fragment {
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String query = searchEditText.getText().toString().trim();
                 if (!query.isEmpty()) {
-                    api.searchAnimeAniList(query).enqueue(new Callback<List<AniListAnime>>() {
+                    api.searchAniList(query, "ANIME").enqueue(new Callback<List<AniListMedia>>() {
                         @Override
-                        public void onResponse(Call<List<AniListAnime>> call, Response<List<AniListAnime>> response) {
+                        public void onResponse(Call<List<AniListMedia>> call, Response<List<AniListMedia>> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 searchAdapter.setAnimeList(response.body());
                             } else {
@@ -103,7 +105,7 @@ public class AddAnimeFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFailure(Call<List<AniListAnime>> call, Throwable t) {
+                        public void onFailure(Call<List<AniListMedia>> call, Throwable t) {
                             Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -114,7 +116,7 @@ public class AddAnimeFragment extends Fragment {
         });
     }
 
-    private void onAnimeSelected(AniListAnime selected) {
+    private void onAnimeSelected(AniListMedia selected) {
         String status = statusSpinner.getSelectedItem().toString();
         String type = typeSpinner.getSelectedItem().toString();
 
@@ -139,6 +141,7 @@ public class AddAnimeFragment extends Fragment {
             public void onResponse(Call<String> call, Response<String> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Anime añadido", Toast.LENGTH_SHORT).show();
+                    registrarActividad(anime.getTitle());
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
                     Toast.makeText(getContext(), "Error al guardar anime", Toast.LENGTH_SHORT).show();
@@ -149,6 +152,20 @@ public class AddAnimeFragment extends Fragment {
             public void onFailure(Call<String> call, Throwable t) {
                 Toast.makeText(getContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    private void registrarActividad(String titulo) {
+        Map<String, Object> actividad = new HashMap<>();
+        actividad.put("userId", userId);
+        actividad.put("action", "Añadió");
+        actividad.put("mediaTitle", titulo);
+
+        api.postActivity(actividad).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call call, Response response) {}
+            @Override
+            public void onFailure(Call call, Throwable t) {}
         });
     }
 }

@@ -3,25 +3,29 @@ package com.santiparra.yomitrack.ui.fragments.profile;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
 import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
-import com.santiparra.yomitrack.db.entities.AnimeEntity;
-import com.santiparra.yomitrack.db.entities.MangaEntity;
+import com.santiparra.yomitrack.utils.ActivityLog;
 
-
+import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -30,111 +34,140 @@ import retrofit2.Response;
 
 public class FragmentProfile extends Fragment {
 
-    private TextView textUsername;
-    private LinearLayout animeStatsContainer, mangaStatsContainer;
+    private ImageView avatarImage, coverImage;
+    private TextView usernameText;
+    private EditText editStatus, editBiography;
+    private Button buttonPostStatus, buttonSaveBio;
+    private LinearLayout animeStatsContainer, mangaStatsContainer, activityContainer;
     private ApiService api;
     private int userId;
+    private String username;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        textUsername = view.findViewById(R.id.usernameText);
+        avatarImage = view.findViewById(R.id.avatarImage);
+        coverImage = view.findViewById(R.id.coverImage);
+        usernameText = view.findViewById(R.id.usernameText);
+        editStatus = view.findViewById(R.id.editStatus);
+        editBiography = view.findViewById(R.id.editBiography);
+        buttonPostStatus = view.findViewById(R.id.buttonPostStatus);
+        buttonSaveBio = view.findViewById(R.id.buttonSaveBio);
         animeStatsContainer = view.findViewById(R.id.animeStatsContainer);
         mangaStatsContainer = view.findViewById(R.id.mangaStatsContainer);
+        activityContainer = view.findViewById(R.id.activityContainer);
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        userId = prefs.getInt("userId", -1);
+        username = prefs.getString("username", "Usuario");
+
         api = ApiClient.getClient().create(ApiService.class);
 
-        SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        userId = prefs.getInt("current_user_id", -1);
-
-        if (userId == -1) {
-            textUsername.setText("Invitado");
-            Toast.makeText(getContext(), "Estadísticas no disponibles en modo invitado", Toast.LENGTH_SHORT).show();
-            return view;
-        }
-
-        textUsername.setText("Usuario #" + userId);
+        usernameText.setText(username);
 
         loadStats();
+        loadActivity();
+
+        buttonPostStatus.setOnClickListener(v -> postStatus());
+        buttonSaveBio.setOnClickListener(v -> saveBiography());
 
         return view;
     }
 
     private void loadStats() {
-        animeStatsContainer.removeAllViews();
-        mangaStatsContainer.removeAllViews();
-
-        api.getAnimeByUser(userId).enqueue(new Callback<List<AnimeEntity>>() {
+        api.getUserStats(userId).enqueue(new Callback<Map<String, Map<String, Integer>>>() {
             @Override
-            public void onResponse(Call<List<AnimeEntity>> call, Response<List<AnimeEntity>> response) {
+            public void onResponse(Call<Map<String, Map<String, Integer>>> call, Response<Map<String, Map<String, Integer>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    showStats(animeStatsContainer, "Anime", countByStatus(response.body()));
+                    Map<String, Integer> animeStats = response.body().get("animeStats");
+                    Map<String, Integer> mangaStats = response.body().get("mangaStats");
+
+                    populateStats(animeStatsContainer, animeStats);
+                    populateStats(mangaStatsContainer, mangaStats);
                 }
             }
 
             @Override
-            public void onFailure(Call<List<AnimeEntity>> call, Throwable t) {
-                Toast.makeText(getContext(), "Error al cargar anime", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        api.getMangaByUser(userId).enqueue(new Callback<List<MangaEntity>>() {
-            @Override
-            public void onResponse(Call<List<MangaEntity>> call, Response<List<MangaEntity>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    showStats(mangaStatsContainer, "Manga", countByStatus(response.body()));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<MangaEntity>> call, Throwable t) {
-                Toast.makeText(getContext(), "Error al cargar manga", Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<Map<String, Map<String, Integer>>> call, Throwable t) {}
         });
     }
 
-    private Map<String, Integer> countByStatus(List<?> items) {
-        Map<String, Integer> counts = new HashMap<>();
-        for (Object item : items) {
-            String status = "";
-            if (item instanceof AnimeEntity) {
-                status = ((AnimeEntity) item).getStatus();
-            } else if (item instanceof MangaEntity) {
-                status = ((MangaEntity) item).getStatus();
-            }
-            counts.put(status, counts.getOrDefault(status, 0) + 1);
-        }
-        return counts;
-    }
-
-    private void showStats(LinearLayout container, String category, Map<String, Integer> data) {
-        TextView title = new TextView(getContext());
-        title.setText(category.toUpperCase());
-        title.setTextSize(18);
-        title.setPadding(0, 24, 0, 12);
-        container.addView(title);
-
+    private void populateStats(LinearLayout container, Map<String, Integer> stats) {
+        container.removeAllViews();
         int total = 0;
-        for (int count : data.values()) total += count;
+        for (int count : stats.values()) total += count;
 
-        for (Map.Entry<String, Integer> entry : data.entrySet()) {
-            String status = entry.getKey();
-            int count = entry.getValue();
-            int percent = (int) ((count / (float) total) * 100);
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        for (Map.Entry<String, Integer> entry : stats.entrySet()) {
+            View statView = inflater.inflate(R.layout.item_stat_bar, container, false);
+            TextView label = statView.findViewById(R.id.statLabelFull);
+            ProgressBar bar = statView.findViewById(R.id.statProgressBar);
 
-            TextView label = new TextView(getContext());
-            label.setText(status + ": " + count + " (" + percent + "%)");
-            label.setTextSize(16);
-            container.addView(label);
-
-            ProgressBar progress = new ProgressBar(getContext(), null, android.R.attr.progressBarStyleHorizontal);
-            progress.setMax(100);
-            progress.setProgress(percent);
-            progress.setLayoutParams(new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            ));
-            container.addView(progress);
+            label.setText(String.format(Locale.getDefault(), "%s • %d", entry.getKey(), entry.getValue()));
+            int progress = total > 0 ? (entry.getValue() * 100 / total) : 0;
+            bar.setProgress(progress);
+            container.addView(statView);
         }
+    }
+
+    private void loadActivity() {
+        api.getActivityLog(userId).enqueue(new Callback<List<ActivityLog>>() {
+            @Override
+            public void onResponse(Call<List<ActivityLog>> call, Response<List<ActivityLog>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    activityContainer.removeAllViews();
+                    LayoutInflater inflater = LayoutInflater.from(getContext());
+
+                    for (ActivityLog log : response.body()) {
+                        View card = inflater.inflate(R.layout.item_activity_card, activityContainer, false);
+                        ((TextView) card.findViewById(R.id.activityUser)).setText(username);
+                        ((TextView) card.findViewById(R.id.activityAction)).setText(log.getAction());
+                        ((TextView) card.findViewById(R.id.activityTitle)).setText(log.getMediaTitle());
+                        ((TextView) card.findViewById(R.id.activityTime)).setText(log.getTimestamp());
+                        activityContainer.addView(card);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ActivityLog>> call, Throwable t) {}
+        });
+    }
+
+    private void postStatus() {
+        String status = editStatus.getText().toString().trim();
+        if (TextUtils.isEmpty(status)) {
+            Toast.makeText(getContext(), "Escribe algo primero", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> post = new HashMap<>();
+        post.put("userId", userId);
+        post.put("action", "publicó");
+        post.put("mediaTitle", status);
+
+        api.postActivity(post).enqueue(new Callback<JSONObject>() {
+            @Override
+            public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+                if (response.isSuccessful()) {
+                    editStatus.setText("");
+                    loadActivity();
+                    Toast.makeText(getContext(), "Publicado", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JSONObject> call, Throwable t) {
+                Toast.makeText(getContext(), "Error al publicar", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void saveBiography() {
+        String bio = editBiography.getText().toString().trim();
+        // Aquí podrías guardar biografía en base de datos si se desea.
+        Toast.makeText(getContext(), "Biografía guardada", Toast.LENGTH_SHORT).show();
     }
 }

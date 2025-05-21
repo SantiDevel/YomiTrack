@@ -2,40 +2,40 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:paddingTop="100dp"
-    android:paddingBottom="80dp"
-    android:fillViewport="true">
+    android:paddingBottom="80dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <EditText
             android:id="@+id/editTextAnimeTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/edit_text_background"
             android:hint="Título del anime"
             android:inputType="text"
-            android:padding="12dp"
-            android:background="@drawable/edit_text_background" />
+            android:padding="12dp" />
 
         <EditText
             android:id="@+id/editTextScore"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:hint="Puntuación (0-100)"
-            android:inputType="number"
-            android:layout_marginTop="12dp" />
+            android:inputType="number" />
 
         <EditText
             android:id="@+id/editTextProgress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:hint="Progreso (episodios vistos)"
-            android:inputType="number"
-            android:layout_marginTop="12dp" />
+            android:inputType="number" />
 
         <Spinner
             android:id="@+id/spinnerStatus"
@@ -55,9 +55,18 @@
             android:id="@+id/buttonSaveAnime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar cambios"
             android:layout_marginTop="24dp"
             android:backgroundTint="@color/primary"
+            android:text="Guardar cambios"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/buttonDeleteAnime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:text="Eliminar anime"
             android:textColor="@android:color/white" />
     </LinearLayout>
 </ScrollView>

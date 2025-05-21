@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -6,12 +5,12 @@
     android:fillViewport="true">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:paddingBottom="32dp">
 
-    <!-- Header con avatar + nombre -->
+        <!-- Encabezado: Cover, Avatar y Nombre -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="200dp">
@@ -27,9 +26,9 @@
                 android:id="@+id/avatarImage"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:layout_margin="16dp"
-                android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
+                android:layout_alignParentBottom="true"
+                android:layout_margin="16dp"
                 android:background="@drawable/circle_mask"
                 android:clipToOutline="true"
                 android:scaleType="centerCrop"
@@ -40,114 +39,93 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/avatarImage"
-                android:layout_toEndOf="@id/avatarImage"
                 android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/avatarImage"
                 android:text="BtwIsSanti"
                 android:textColor="@color/textPrimary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
         </RelativeLayout>
 
-        <!-- Descripción en tarjeta -->
-        <androidx.cardview.widget.CardView
+
+        <!-- Biografía -->
+        <EditText
+            android:id="@+id/editBiography"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="6dp">
+            android:layout_marginTop="12dp"
+            android:background="@drawable/edittext_background"
+            android:hint="Escribe tu biografía aquí"
+            android:inputType="textMultiLine"
+            android:minLines="3" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@color/primary">
+        <Button
+            android:id="@+id/buttonSaveBio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Guardar Biografía" />
 
-                <TextView
-                    android:id="@+id/descriptionTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Description"
-                    android:textColor="@color/textPrimary"
-                    android:textStyle="bold"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/profileDescriptionText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Eiko is my waifu right now. Mai and Mikasa is my second wife."
-                    android:textColor="@color/textPrimary"
-                    android:textSize="16sp"
-                    android:maxLines="2"
-                    android:ellipsize="end"
-                    android:layout_marginTop="8dp" />
-
-                <TextView
-                    android:id="@+id/textViewSeeMore"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ver más"
-                    android:textColor="@color/activeTint"
-                    android:textSize="14sp"
-                    android:paddingTop="4dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Estadísticas de anime -->
+        <!-- Estadísticas de Anime -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="Anime Stats"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/animeStatsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_margin="16dp" />
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical" />
 
-        <!-- Estadísticas de manga -->
+        <!-- Estadísticas de Manga -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="Manga Stats"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/mangaStatsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_margin="16dp" />
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical" />
+
+        <!-- Estado / Pensamiento -->
+        <EditText
+            android:id="@+id/editStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/edittext_background"
+            android:hint="¿Qué estás pensando?"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/buttonPostStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Publicar Estado" />
 
         <!-- Actividad reciente -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Recent Activity"
+            android:layout_marginTop="16dp"
+            android:text="Actividad Reciente"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/activityContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="32dp"
-            android:paddingBottom="8dp" />
+            android:orientation="vertical" />
     </LinearLayout>
 </ScrollView>
