@@ -2,24 +2,22 @@ package com.santiparra.yomitrack.ui.fragments.profile;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
+import com.santiparra.yomitrack.model.UserStatsResponse;
 import com.santiparra.yomitrack.utils.ActivityLog;
 
 import org.json.JSONObject;
@@ -42,11 +40,12 @@ public class FragmentProfile extends Fragment {
     private ApiService api;
     private int userId;
     private String username;
+    private View view;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         avatarImage = view.findViewById(R.id.avatarImage);
         coverImage = view.findViewById(R.id.coverImage);
@@ -59,12 +58,11 @@ public class FragmentProfile extends Fragment {
         mangaStatsContainer = view.findViewById(R.id.mangaStatsContainer);
         activityContainer = view.findViewById(R.id.activityContainer);
 
-        SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        userId = prefs.getInt("userId", -1);
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        userId = prefs.getInt("user_id", -1);
         username = prefs.getString("username", "Usuario");
 
         api = ApiClient.getClient().create(ApiService.class);
-
         usernameText.setText(username);
 
         loadStats();
@@ -76,26 +74,43 @@ public class FragmentProfile extends Fragment {
         return view;
     }
 
-    private void loadStats() {
-        api.getUserStats(userId).enqueue(new Callback<Map<String, Map<String, Integer>>>() {
-            @Override
-            public void onResponse(Call<Map<String, Map<String, Integer>>> call, Response<Map<String, Map<String, Integer>>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Map<String, Integer> animeStats = response.body().get("animeStats");
-                    Map<String, Integer> mangaStats = response.body().get("mangaStats");
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadStats();
+        loadActivity();
+    }
 
-                    populateStats(animeStatsContainer, animeStats);
-                    populateStats(mangaStatsContainer, mangaStats);
+    private void loadStats() {
+        api.getUserStats(userId).enqueue(new Callback<UserStatsResponse>() {
+            @Override
+            public void onResponse(Call<UserStatsResponse> call, Response<UserStatsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    populateStats(animeStatsContainer, response.body().getAnimeStats());
+                    populateStats(mangaStatsContainer, response.body().getMangaStats());
+                } else {
+                    Toast.makeText(getContext(), "Error al obtener estadísticas", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Map<String, Map<String, Integer>>> call, Throwable t) {}
+            public void onFailure(Call<UserStatsResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión al cargar stats", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     private void populateStats(LinearLayout container, Map<String, Integer> stats) {
         container.removeAllViews();
+
+        if (stats == null || stats.isEmpty()) {
+            TextView noData = new TextView(getContext());
+            noData.setText("No hay estadísticas disponibles");
+            noData.setPadding(16, 8, 16, 8);
+            container.addView(noData);
+            return;
+        }
+
         int total = 0;
         for (int count : stats.values()) total += count;
 
@@ -108,7 +123,29 @@ public class FragmentProfile extends Fragment {
             label.setText(String.format(Locale.getDefault(), "%s • %d", entry.getKey(), entry.getValue()));
             int progress = total > 0 ? (entry.getValue() * 100 / total) : 0;
             bar.setProgress(progress);
+
+            // Usar método compatible para aplicar color de estado
+            int color = getColorForStatus(entry.getKey());
+            bar.setProgressTintList(ColorStateList.valueOf(color));
+
             container.addView(statView);
+        }
+    }
+
+    private int getColorForStatus(String status) {
+        switch (status.toLowerCase(Locale.ROOT)) {
+            case "watching":
+                return requireContext().getColor(R.color.status_watching);
+            case "completed":
+                return requireContext().getColor(R.color.status_completed);
+            case "paused":
+                return requireContext().getColor(R.color.status_paused);
+            case "dropped":
+                return requireContext().getColor(R.color.status_dropped);
+            case "planning":
+                return requireContext().getColor(R.color.status_planning);
+            default:
+                return requireContext().getColor(R.color.gray);
         }
     }
 
@@ -132,7 +169,9 @@ public class FragmentProfile extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<ActivityLog>> call, Throwable t) {}
+            public void onFailure(Call<List<ActivityLog>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error al cargar actividad", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -167,7 +206,6 @@ public class FragmentProfile extends Fragment {
 
     private void saveBiography() {
         String bio = editBiography.getText().toString().trim();
-        // Aquí podrías guardar biografía en base de datos si se desea.
         Toast.makeText(getContext(), "Biografía guardada", Toast.LENGTH_SHORT).show();
     }
 }

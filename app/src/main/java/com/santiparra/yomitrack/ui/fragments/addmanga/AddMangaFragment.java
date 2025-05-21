@@ -59,8 +59,8 @@ public class AddMangaFragment extends Fragment {
         searchResults.setLayoutManager(new LinearLayoutManager(getContext()));
 
         api = ApiClient.getClient().create(ApiService.class);
-        SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        userId = prefs.getInt("current_user_id", -1);
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        userId = prefs.getInt("user_id", -1);
 
         setupSpinners();
         setupRecycler();
@@ -123,7 +123,8 @@ public class AddMangaFragment extends Fragment {
         try {
             score = Integer.parseInt(scoreEditText.getText().toString());
             progress = Integer.parseInt(progressEditText.getText().toString());
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
 
         MangaEntity manga = new MangaEntity();
         manga.setUserId(userId);
@@ -161,9 +162,12 @@ public class AddMangaFragment extends Fragment {
 
         api.postActivity(actividad).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call call, Response response) {}
+            public void onResponse(Call call, Response response) {
+            }
+
             @Override
-            public void onFailure(Call call, Throwable t) {}
+            public void onFailure(Call call, Throwable t) {
+            }
         });
     }
 }

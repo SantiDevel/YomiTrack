@@ -5,10 +5,10 @@ import java.util.Map;
 
 public class UserStatsResponse {
 
-    @SerializedName("anime")
+    @SerializedName("animeStats")
     private Map<String, Integer> animeStats;
 
-    @SerializedName("manga")
+    @SerializedName("mangaStats")
     private Map<String, Integer> mangaStats;
 
     public Map<String, Integer> getAnimeStats() {

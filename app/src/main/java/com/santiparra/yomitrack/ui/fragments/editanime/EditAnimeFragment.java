@@ -3,6 +3,7 @@ package com.santiparra.yomitrack.ui.fragments.editanime;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.AnimeEntity;
+import com.santiparra.yomitrack.model.ApiResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,10 +56,8 @@ public class EditAnimeFragment extends Fragment {
 
         api = ApiClient.getClient().create(ApiService.class);
 
-        // Llenar campos
         fillFields();
 
-        // Spinner datos
         String[] statusArray = getResources().getStringArray(R.array.anime_status_array);
         String[] typeArray = getResources().getStringArray(R.array.anime_type_array);
 
@@ -114,7 +114,7 @@ public class EditAnimeFragment extends Fragment {
             return;
         }
 
-        int score = 0, progress = 0;
+        int score, progress;
         try {
             score = Integer.parseInt(scoreStr);
             progress = Integer.parseInt(progressStr);
@@ -132,12 +132,17 @@ public class EditAnimeFragment extends Fragment {
         anime.setStatus(status);
         anime.setType(type);
 
-        api.updateAnime(anime.getId(), anime).enqueue(new Callback<String>() {
+        api.updateAnime(anime.getId(), anime).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                Log.d("API_RESPONSE", "onResponse ejecutado: " + response.body());
+
+                if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Anime actualizado", Toast.LENGTH_SHORT).show();
-                    requireContext().getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+                    String message = response.body() != null ? response.body().getMessage() : "Anime actualizado";
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                    requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
@@ -146,19 +151,24 @@ public class EditAnimeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "onFailure ejecutado: " + t.getMessage(), t);
+                if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void deleteAnime() {
-        api.deleteAnime(anime.getId()).enqueue(new Callback<String>() {
+        api.deleteAnime(anime.getId()).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Anime eliminado", Toast.LENGTH_SHORT).show();
-                    requireContext().getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+                    String message = response.body() != null ? response.body().getMessage() : "Anime eliminado";
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                    requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
@@ -167,7 +177,9 @@ public class EditAnimeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "onFailure eliminar: " + t.getMessage(), t);
+                if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
         });

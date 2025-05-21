@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.AnimeEntity;
 import com.santiparra.yomitrack.model.AnimePageResponse;
+import com.santiparra.yomitrack.model.ApiResponse;
 import com.santiparra.yomitrack.model.adapters.anime_adapter.AnimeAdapter;
 import com.santiparra.yomitrack.ui.fragments.addanime.AddAnimeFragment;
 import com.santiparra.yomitrack.ui.fragments.editanime.EditAnimeFragment;
@@ -72,8 +74,8 @@ public class FragmentAnime extends Fragment {
         btnViewNormal = view.findViewById(R.id.btnViewNormal);
         btnViewLarge = view.findViewById(R.id.btnViewLarge);
         FloatingActionButton fabAdd = view.findViewById(R.id.fabAddAnime);
-
         editSearch = view.findViewById(R.id.editSearch);
+
         editSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -155,9 +157,7 @@ public class FragmentAnime extends Fragment {
             recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         }
 
-        adapter = new AnimeAdapter(animeList, viewType,
-                this::showEditDialog,
-                this::deleteAnime);
+        adapter = new AnimeAdapter(animeList, viewType, this::showEditDialog, this::deleteAnime);
         recyclerView.setAdapter(adapter);
     }
 
@@ -170,13 +170,14 @@ public class FragmentAnime extends Fragment {
     }
 
     private void deleteAnime(AnimeEntity anime) {
-        api.deleteAnime(anime.getId()).enqueue(new Callback<String>() {
+        api.deleteAnime(anime.getId()).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (!isAdded()) return;
 
                 if (response.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Anime eliminado", Toast.LENGTH_SHORT).show();
+                    String msg = response.body() != null ? response.body().getMessage() : "Anime eliminado";
+                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
                     currentPage = 1;
                     animeList.clear();
                     loadMoreAnimes(currentPage);
@@ -186,7 +187,8 @@ public class FragmentAnime extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "Fallo al eliminar: " + t.getMessage(), t);
                 if (isAdded()) {
                     Toast.makeText(requireContext(), "Fallo de conexión", Toast.LENGTH_SHORT).show();
                 }
@@ -215,6 +217,7 @@ public class FragmentAnime extends Fragment {
 
             @Override
             public void onFailure(Call<AnimePageResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "Error cargando más animes: " + t.getMessage(), t);
                 isLoading = false;
                 if (isAdded()) {
                     Toast.makeText(requireContext(), "Error al cargar más animes", Toast.LENGTH_SHORT).show();

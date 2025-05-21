@@ -3,6 +3,7 @@ package com.santiparra.yomitrack.ui.fragments.editmanga;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.MangaEntity;
+import com.santiparra.yomitrack.model.ApiResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,8 +42,7 @@ public class EditMangaFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view,
-                              @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         editTextTitle = view.findViewById(R.id.editTextMangaTitle);
@@ -112,7 +113,7 @@ public class EditMangaFragment extends Fragment {
             return;
         }
 
-        int score = 0, progress = 0;
+        int score, progress;
         try {
             score = Integer.parseInt(scoreStr);
             progress = Integer.parseInt(progressStr);
@@ -130,12 +131,17 @@ public class EditMangaFragment extends Fragment {
         manga.setStatus(status);
         manga.setType(type);
 
-        api.updateManga(manga.getId(), manga).enqueue(new Callback<String>() {
+        api.updateManga(manga.getId(), manga).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                Log.d("API_RESPONSE", "onResponse ejecutado: " + response.body());
+
+                if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Manga actualizado", Toast.LENGTH_SHORT).show();
-                    requireContext().getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+                    String message = response.body() != null ? response.body().getMessage() : "Manga actualizado";
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                    requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
@@ -144,19 +150,24 @@ public class EditMangaFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "onFailure ejecutado: " + t.getMessage(), t);
+                if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void deleteManga() {
-        api.deleteManga(manga.getId()).enqueue(new Callback<String>() {
+        api.deleteManga(manga.getId()).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Manga eliminado", Toast.LENGTH_SHORT).show();
-                    requireContext().getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+                    String message = response.body() != null ? response.body().getMessage() : "Manga eliminado";
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                    requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
@@ -165,7 +176,9 @@ public class EditMangaFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "onFailure eliminar: " + t.getMessage(), t);
+                if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
         });

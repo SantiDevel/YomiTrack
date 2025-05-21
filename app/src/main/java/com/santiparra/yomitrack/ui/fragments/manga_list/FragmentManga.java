@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.model.MangaPageResponse;
+import com.santiparra.yomitrack.model.ApiResponse;
 import com.santiparra.yomitrack.model.adapters.manga_adapter.MangaAdapter;
 import com.santiparra.yomitrack.ui.fragments.addmanga.AddMangaFragment;
 import com.santiparra.yomitrack.ui.fragments.editmanga.EditMangaFragment;
@@ -48,7 +50,7 @@ public class FragmentManga extends Fragment {
 
     private ImageButton btnViewCompact, btnViewNormal, btnViewLarge;
     private int currentViewType = MangaAdapter.VIEW_NORMAL;
-    private List<MangaEntity> mangaList = new ArrayList<>();
+    private final List<MangaEntity> mangaList = new ArrayList<>();
 
     private boolean isLoading = false;
     private int currentPage = 1;
@@ -90,7 +92,6 @@ public class FragmentManga extends Fragment {
             Toast.makeText(getContext(), "Error: sesión no iniciada", Toast.LENGTH_SHORT).show();
             return;
         }
-
 
         fabAdd.setOnClickListener(v -> requireActivity().getSupportFragmentManager()
                 .beginTransaction()
@@ -168,12 +169,14 @@ public class FragmentManga extends Fragment {
     }
 
     private void deleteManga(MangaEntity manga) {
-        api.deleteManga(manga.getId()).enqueue(new Callback<String>() {
+        api.deleteManga(manga.getId()).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (!isAdded()) return;
+
                 if (response.isSuccessful()) {
-                    Toast.makeText(requireContext(), "Manga eliminado", Toast.LENGTH_SHORT).show();
+                    String msg = response.body() != null ? response.body().getMessage() : "Manga eliminado";
+                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
                     currentPage = 1;
                     mangaList.clear();
                     loadMoreMangas(currentPage);
@@ -183,7 +186,8 @@ public class FragmentManga extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "Fallo al eliminar manga: " + t.getMessage(), t);
                 if (isAdded()) {
                     Toast.makeText(requireContext(), "Fallo de conexión", Toast.LENGTH_SHORT).show();
                 }
@@ -197,6 +201,7 @@ public class FragmentManga extends Fragment {
             @Override
             public void onResponse(Call<MangaPageResponse> call, Response<MangaPageResponse> response) {
                 if (!isAdded()) return;
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<MangaEntity> nuevos = response.body().getData();
                     mangaList.addAll(nuevos);
@@ -209,6 +214,7 @@ public class FragmentManga extends Fragment {
 
             @Override
             public void onFailure(Call<MangaPageResponse> call, Throwable t) {
+                Log.e("API_RESPONSE", "Error al cargar mangas: " + t.getMessage(), t);
                 isLoading = false;
                 if (isAdded()) {
                     Toast.makeText(requireContext(), "Error al cargar más mangas", Toast.LENGTH_SHORT).show();

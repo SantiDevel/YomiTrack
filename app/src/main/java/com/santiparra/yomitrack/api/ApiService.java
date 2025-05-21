@@ -5,6 +5,7 @@ import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.db.entities.UserEntity;
 import com.santiparra.yomitrack.model.AniListMedia;
 import com.santiparra.yomitrack.model.AnimePageResponse;
+import com.santiparra.yomitrack.model.ApiResponse;
 import com.santiparra.yomitrack.model.LoginResponse;
 import com.santiparra.yomitrack.model.MangaPageResponse;
 import com.santiparra.yomitrack.model.RegisterResponse;
@@ -49,10 +50,10 @@ public interface ApiService {
     );
 
     @PUT("anime/{id}")
-    Call<String> updateAnime(@Path("id") int animeId, @Body AnimeEntity anime);
+    Call<ApiResponse> updateAnime(@Path("id") int animeId, @Body AnimeEntity anime);
 
     @DELETE("anime/delete/{id}")
-    Call<String> deleteAnime(@Path("id") int id);
+    Call<ApiResponse> deleteAnime(@Path("id") int id);
 
     // ---------------- Manga ----------------
     @POST("manga/add")
@@ -69,15 +70,15 @@ public interface ApiService {
     );
 
     @PUT("manga/{id}")
-    Call<String> updateManga(@Path("id") int mangaId, @Body MangaEntity manga);
+    Call<ApiResponse> updateManga(@Path("id") int mangaId, @Body MangaEntity manga);
 
     @DELETE("manga/delete/{id}")
-    Call<String> deleteManga(@Path("id") int id);
+    Call<ApiResponse> deleteManga(@Path("id") int id);
 
     // ---------------- Activity -------------------
 
-    @GET("user/{id}/stats")
-    Call<Map<String, Map<String, Integer>>> getUserStats(@Path("id") int userId);
+    @GET("users/{id}/stats")
+    Call<UserStatsResponse> getUserStats(@Path("id") int userId);
 
     @GET("api/activity/list/{userId}")
     Call<List<ActivityLog>> getActivityLog(@Path("userId") int userId);
