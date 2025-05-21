@@ -13,6 +13,13 @@ public class ActivityLog {
     @SerializedName("timestamp")
     private String timestamp;
 
+    @SerializedName("imagenUrl")
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
     public String getAction() { return action; }
 
     public String getMediaTitle() { return mediaTitle; }

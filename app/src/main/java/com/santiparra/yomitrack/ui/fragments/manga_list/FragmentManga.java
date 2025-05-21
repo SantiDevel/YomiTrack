@@ -46,7 +46,7 @@ public class FragmentManga extends Fragment {
     private RecyclerView recyclerView;
     private MangaAdapter adapter;
     private ApiService api;
-    private int userId = 1;
+    private int userId;
 
     private ImageButton btnViewCompact, btnViewNormal, btnViewLarge;
     private int currentViewType = MangaAdapter.VIEW_NORMAL;
@@ -58,31 +58,17 @@ public class FragmentManga extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_mlist, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view,
-                              @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerView = view.findViewById(R.id.recyclerViewManga);
-        btnViewCompact = view.findViewById(R.id.btnViewCompact);
-        btnViewNormal = view.findViewById(R.id.btnViewNormal);
-        btnViewLarge = view.findViewById(R.id.btnViewLarge);
-        FloatingActionButton fabAdd = view.findViewById(R.id.fabAddManga);
-        editSearch = view.findViewById(R.id.editSearch);
-
-        editSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void afterTextChanged(Editable s) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterMangaList(s.toString());
-            }
-        });
+        initViews(view);
+        setupListeners();
+        setupRecyclerView();
 
         api = ApiClient.getClient().create(ApiService.class);
         SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
@@ -93,18 +79,54 @@ public class FragmentManga extends Fragment {
             return;
         }
 
+        setViewType(currentViewType);
+        loadMoreMangas(currentPage);
+    }
+
+    private void initViews(View view) {
+        recyclerView = view.findViewById(R.id.recyclerViewManga);
+        btnViewCompact = view.findViewById(R.id.btnViewCompact);
+        btnViewNormal = view.findViewById(R.id.btnViewNormal);
+        btnViewLarge = view.findViewById(R.id.btnViewLarge);
+        FloatingActionButton fabAdd = view.findViewById(R.id.fabAddManga);
+        editSearch = view.findViewById(R.id.editSearch);
+
         fabAdd.setOnClickListener(v -> requireActivity().getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frame_layout, new AddMangaFragment())
                 .addToBackStack(null)
                 .commit());
 
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            recyclerView.setPadding(
+                    recyclerView.getPaddingLeft(),
+                    recyclerView.getPaddingTop(),
+                    recyclerView.getPaddingRight(),
+                    bottomInset + 95
+            );
+            return insets;
+        });
+    }
+
+    private void setupListeners() {
+        editSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterMangaList(s.toString());
+            }
+        });
+
         btnViewCompact.setOnClickListener(v -> setViewType(MangaAdapter.VIEW_COMPACT));
         btnViewNormal.setOnClickListener(v -> setViewType(MangaAdapter.VIEW_NORMAL));
         btnViewLarge.setOnClickListener(v -> setViewType(MangaAdapter.VIEW_LARGE));
+    }
 
-        setViewType(currentViewType);
-        loadMoreMangas(currentPage);
+    private void setupRecyclerView() {
+        adapter = new MangaAdapter(mangaList, currentViewType, this::showEditDialog, this::deleteManga);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(adapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -122,27 +144,6 @@ public class FragmentManga extends Fragment {
                 }
             }
         });
-
-        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
-            int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-            recyclerView.setPadding(
-                    recyclerView.getPaddingLeft(),
-                    recyclerView.getPaddingTop(),
-                    recyclerView.getPaddingRight(),
-                    bottomInset + 95
-            );
-            return insets;
-        });
-    }
-
-    private void filterMangaList(String query) {
-        List<MangaEntity> filtered = new ArrayList<>();
-        for (MangaEntity manga : mangaList) {
-            if (manga.getTitle().toLowerCase().contains(query.toLowerCase())) {
-                filtered.add(manga);
-            }
-        }
-        adapter.updateList(filtered);
     }
 
     private void setViewType(int viewType) {
@@ -154,10 +155,18 @@ public class FragmentManga extends Fragment {
             recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         }
 
-        adapter = new MangaAdapter(mangaList, viewType,
-                this::showEditDialog,
-                this::deleteManga);
+        adapter = new MangaAdapter(mangaList, viewType, this::showEditDialog, this::deleteManga);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void filterMangaList(String query) {
+        List<MangaEntity> filtered = new ArrayList<>();
+        for (MangaEntity manga : mangaList) {
+            if (manga.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                filtered.add(manga);
+            }
+        }
+        adapter.updateList(filtered);
     }
 
     private void showEditDialog(MangaEntity manga) {
@@ -175,8 +184,7 @@ public class FragmentManga extends Fragment {
                 if (!isAdded()) return;
 
                 if (response.isSuccessful()) {
-                    String msg = response.body() != null ? response.body().getMessage() : "Manga eliminado";
-                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), response.body() != null ? response.body().getMessage() : "Manga eliminado", Toast.LENGTH_SHORT).show();
                     currentPage = 1;
                     mangaList.clear();
                     loadMoreMangas(currentPage);

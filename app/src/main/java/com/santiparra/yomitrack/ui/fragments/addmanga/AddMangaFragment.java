@@ -20,11 +20,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.JsonObject;
 import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.model.AniListMedia;
+import com.santiparra.yomitrack.model.ApiResponse;
 import com.santiparra.yomitrack.model.adapters.manga_adapter.MangaSearchAdapter;
 
 import java.util.ArrayList;
@@ -44,6 +46,7 @@ public class AddMangaFragment extends Fragment {
     private MangaSearchAdapter searchAdapter;
     private ApiService api;
     private int userId;
+    private String selectedImageUrl = "";
 
     @Nullable
     @Override
@@ -135,11 +138,13 @@ public class AddMangaFragment extends Fragment {
         manga.setScore(score);
         manga.setProgress(progress);
 
-        api.insertManga(manga).enqueue(new Callback<String>() {
+        selectedImageUrl = selected.getImageUrl();
+
+        api.insertManga(manga).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Manga añadido correctamente", Toast.LENGTH_SHORT).show();
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(getContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     registrarActividad(manga.getTitle());
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
@@ -148,7 +153,7 @@ public class AddMangaFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
                 Toast.makeText(getContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
         });
@@ -157,16 +162,21 @@ public class AddMangaFragment extends Fragment {
     private void registrarActividad(String titulo) {
         Map<String, Object> actividad = new HashMap<>();
         actividad.put("userId", userId);
-        actividad.put("action", "Añadió");
+        actividad.put("action", "añadió un manga");
         actividad.put("mediaTitle", titulo);
+        actividad.put("imageUrl", selectedImageUrl);
 
-        api.postActivity(actividad).enqueue(new Callback<>() {
+        api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (!response.isSuccessful()) {
+                    // Puedes logear el error si lo deseas
+                }
             }
 
             @Override
-            public void onFailure(Call call, Throwable t) {
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(getContext(), "Error al registrar actividad", Toast.LENGTH_SHORT).show();
             }
         });
     }

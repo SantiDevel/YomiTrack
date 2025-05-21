@@ -13,11 +13,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.JsonObject;
 import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.model.ApiResponse;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,8 +40,7 @@ public class EditMangaFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_edit_manga, container, false);
     }
 
@@ -134,13 +137,11 @@ public class EditMangaFragment extends Fragment {
         api.updateManga(manga.getId(), manga).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                Log.d("API_RESPONSE", "onResponse ejecutado: " + response.body());
-
                 if (!isAdded()) return;
 
-                if (response.isSuccessful()) {
-                    String message = response.body() != null ? response.body().getMessage() : "Manga actualizado";
-                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                    registrarActividad(manga.getTitle());
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -151,7 +152,6 @@ public class EditMangaFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
-                Log.e("API_RESPONSE", "onFailure ejecutado: " + t.getMessage(), t);
                 if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
@@ -164,9 +164,8 @@ public class EditMangaFragment extends Fragment {
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (!isAdded()) return;
 
-                if (response.isSuccessful()) {
-                    String message = response.body() != null ? response.body().getMessage() : "Manga eliminado";
-                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -177,9 +176,34 @@ public class EditMangaFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
-                Log.e("API_RESPONSE", "onFailure eliminar: " + t.getMessage(), t);
                 if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void registrarActividad(String titulo) {
+        int userId = requireContext()
+                .getSharedPreferences("user_session", Context.MODE_PRIVATE)
+                .getInt("user_id", -1);
+
+        if (userId == -1) return;
+
+        Map<String, Object> actividad = new HashMap<>();
+        actividad.put("userId", userId);
+        actividad.put("action", "editó un manga");
+        actividad.put("mediaTitle", titulo);
+        actividad.put("imageUrl", manga.getImageUrl());
+
+        api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                Log.d("ACTIVITY_EDIT_MANGA", "Actividad registrada: " + response.code());
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.e("ACTIVITY_EDIT_MANGA", "Error al registrar actividad: " + t.getMessage(), t);
             }
         });
     }

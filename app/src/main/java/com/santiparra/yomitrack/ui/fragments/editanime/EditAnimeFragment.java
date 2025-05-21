@@ -13,11 +13,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.JsonObject;
 import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.AnimeEntity;
 import com.santiparra.yomitrack.model.ApiResponse;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -142,6 +146,7 @@ public class EditAnimeFragment extends Fragment {
                 if (response.isSuccessful()) {
                     String message = response.body() != null ? response.body().getMessage() : "Anime actualizado";
                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                    registrarActividad(anime.getTitle());
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -181,6 +186,32 @@ public class EditAnimeFragment extends Fragment {
                 Log.e("API_RESPONSE", "onFailure eliminar: " + t.getMessage(), t);
                 if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void registrarActividad(String titulo) {
+        int userId = requireContext()
+                .getSharedPreferences("user_session", Context.MODE_PRIVATE)
+                .getInt("user_id", -1);
+
+        if (userId == -1) return;
+
+        Map<String, Object> actividad = new HashMap<>();
+        actividad.put("userId", userId);
+        actividad.put("action", "editó un anime");
+        actividad.put("mediaTitle", titulo);
+        actividad.put("imageUrl", anime.getImageUrl());
+
+        api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                Log.d("ACTIVITY_EDIT", "Actividad registrada: " + response.code());
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.e("ACTIVITY_EDIT", "Error al registrar actividad: " + t.getMessage(), t);
             }
         });
     }

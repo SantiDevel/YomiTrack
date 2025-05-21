@@ -46,7 +46,7 @@ public class FragmentAnime extends Fragment {
     private RecyclerView recyclerView;
     private AnimeAdapter adapter;
     private ApiService api;
-    private int userId = 1;
+    private int userId;
 
     private ImageButton btnViewCompact, btnViewNormal, btnViewLarge;
     private int currentViewType = AnimeAdapter.VIEW_NORMAL;
@@ -69,22 +69,13 @@ public class FragmentAnime extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerView = view.findViewById(R.id.recyclerViewAnime);
-        btnViewCompact = view.findViewById(R.id.btnViewCompact);
-        btnViewNormal = view.findViewById(R.id.btnViewNormal);
-        btnViewLarge = view.findViewById(R.id.btnViewLarge);
-        FloatingActionButton fabAdd = view.findViewById(R.id.fabAddAnime);
-        editSearch = view.findViewById(R.id.editSearch);
+        initViews(view);
+        setupRecyclerView();
+        setupViewButtons();
+        setupSearchListener();
+        setupFab(view);
+        setupInsets(view);
 
-        editSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterAnimeList(s.toString());
-            }
-            @Override public void afterTextChanged(Editable s) {}
-        });
-
-        api = ApiClient.getClient().create(ApiService.class);
         SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);
 
@@ -93,25 +84,26 @@ public class FragmentAnime extends Fragment {
             return;
         }
 
+        loadMoreAnimes(currentPage);
+    }
+
+    private void initViews(View view) {
+        recyclerView = view.findViewById(R.id.recyclerViewAnime);
+        btnViewCompact = view.findViewById(R.id.btnViewCompact);
+        btnViewNormal = view.findViewById(R.id.btnViewNormal);
+        btnViewLarge = view.findViewById(R.id.btnViewLarge);
+        editSearch = view.findViewById(R.id.editSearch);
+        api = ApiClient.getClient().create(ApiService.class);
+    }
+
+    private void setupRecyclerView() {
         adapter = new AnimeAdapter(animeList, currentViewType, this::showEditDialog, this::deleteAnime);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
-        fabAdd.setOnClickListener(v -> requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.frame_layout, new AddAnimeFragment())
-                .addToBackStack(null)
-                .commit());
-
-        btnViewCompact.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_COMPACT));
-        btnViewNormal.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_NORMAL));
-        btnViewLarge.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_LARGE));
-
-        setViewType(currentViewType);
-        loadMoreAnimes(currentPage);
-
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (layoutManager == null) return;
 
@@ -125,7 +117,34 @@ public class FragmentAnime extends Fragment {
                 }
             }
         });
+    }
 
+    private void setupViewButtons() {
+        btnViewCompact.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_COMPACT));
+        btnViewNormal.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_NORMAL));
+        btnViewLarge.setOnClickListener(v -> setViewType(AnimeAdapter.VIEW_LARGE));
+    }
+
+    private void setupSearchListener() {
+        editSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterAnimeList(s.toString());
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void setupFab(View view) {
+        FloatingActionButton fabAdd = view.findViewById(R.id.fabAddAnime);
+        fabAdd.setOnClickListener(v -> requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_layout, new AddAnimeFragment())
+                .addToBackStack(null)
+                .commit());
+    }
+
+    private void setupInsets(View view) {
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
             int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
             recyclerView.setPadding(
@@ -150,13 +169,9 @@ public class FragmentAnime extends Fragment {
 
     private void setViewType(int viewType) {
         currentViewType = viewType;
-
-        if (viewType == AnimeAdapter.VIEW_LARGE) {
-            recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-        } else {
-            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        }
-
+        recyclerView.setLayoutManager(viewType == AnimeAdapter.VIEW_LARGE ?
+                new GridLayoutManager(requireContext(), 2) :
+                new LinearLayoutManager(requireContext()));
         adapter = new AnimeAdapter(animeList, viewType, this::showEditDialog, this::deleteAnime);
         recyclerView.setAdapter(adapter);
     }
@@ -175,9 +190,8 @@ public class FragmentAnime extends Fragment {
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (!isAdded()) return;
 
-                if (response.isSuccessful()) {
-                    String msg = response.body() != null ? response.body().getMessage() : "Anime eliminado";
-                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     currentPage = 1;
                     animeList.clear();
                     loadMoreAnimes(currentPage);
@@ -208,7 +222,6 @@ public class FragmentAnime extends Fragment {
                     List<AnimeEntity> nuevos = response.body().getData();
                     animeList.addAll(nuevos);
                     adapter.notifyItemRangeInserted(animeList.size() - nuevos.size(), nuevos.size());
-
                     isLoading = response.body().isHasNextPage();
                 } else {
                     isLoading = false;

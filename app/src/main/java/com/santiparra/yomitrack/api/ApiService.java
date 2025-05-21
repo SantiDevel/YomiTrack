@@ -1,5 +1,6 @@
 package com.santiparra.yomitrack.api;
 
+import com.google.gson.JsonObject;
 import com.santiparra.yomitrack.db.entities.AnimeEntity;
 import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.db.entities.UserEntity;
@@ -36,7 +37,7 @@ public interface ApiService {
 
     // ---------------- Anime ----------------
     @POST("anime/add")
-    Call<String> insertAnime(@Body AnimeEntity anime);
+    Call<ApiResponse> insertAnime(@Body AnimeEntity anime);
 
     @GET("anime/list/{userId}")
     Call<List<AnimeEntity>> getAnimeByUser(@Path("userId") int userId);
@@ -57,7 +58,7 @@ public interface ApiService {
 
     // ---------------- Manga ----------------
     @POST("manga/add")
-    Call<String> insertManga(@Body MangaEntity manga);
+    Call<ApiResponse> insertManga(@Body MangaEntity manga);
 
     @GET("manga/list/{userId}")
     Call<List<MangaEntity>> getMangaByUser(@Path("userId") int userId);
@@ -82,8 +83,8 @@ public interface ApiService {
 
     @GET("api/activity/list/{userId}")
     Call<List<ActivityLog>> getActivityLog(@Path("userId") int userId);
-    @POST("activity/add")
-    Call<JSONObject> postActivity(@Body Map<String, Object> body);
+    @POST("api/activity/add")
+    Call<JsonObject> postActivity(@Body Map<String, Object> body);
 
 
     // ---------------- AniList API ----------------
