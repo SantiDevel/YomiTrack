@@ -19,6 +19,7 @@ import com.santiparra.yomitrack.api.ApiClient;
 import com.santiparra.yomitrack.api.ApiService;
 import com.santiparra.yomitrack.db.entities.MangaEntity;
 import com.santiparra.yomitrack.model.ApiResponse;
+import com.santiparra.yomitrack.ui.fragments.profile.FragmentProfile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -141,7 +142,7 @@ public class EditMangaFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    registrarActividad(manga.getTitle());
+                    registrarActividad(manga.getTitle(), manga.getImageUrl());
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -159,13 +160,15 @@ public class EditMangaFragment extends Fragment {
     }
 
     private void deleteManga() {
+        registrarActividadEliminacionManga(manga.getTitle(), manga.getImageUrl());
+
         api.deleteManga(manga.getId()).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (!isAdded()) return;
 
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful()) {
+                    Toast.makeText(requireContext(), "Manga eliminado", Toast.LENGTH_SHORT).show();
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -182,29 +185,55 @@ public class EditMangaFragment extends Fragment {
         });
     }
 
-    private void registrarActividad(String titulo) {
-        int userId = requireContext()
-                .getSharedPreferences("user_session", Context.MODE_PRIVATE)
-                .getInt("user_id", -1);
-
+    private void registrarActividad(String titulo, String imagen) {
+        int userId = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE).getInt("user_id", -1);
         if (userId == -1) return;
 
         Map<String, Object> actividad = new HashMap<>();
         actividad.put("userId", userId);
-        actividad.put("action", "editó un manga");
+        actividad.put("action", "update de un manga");
         actividad.put("mediaTitle", titulo);
-        actividad.put("imageUrl", manga.getImageUrl());
+        actividad.put("imageUrl", imagen);
 
         api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                Log.d("ACTIVITY_EDIT_MANGA", "Actividad registrada: " + response.code());
+                Log.d("ACTIVITY_DELETE", "Actividad de edicion registrada");
             }
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
-                Log.e("ACTIVITY_EDIT_MANGA", "Error al registrar actividad: " + t.getMessage(), t);
+                Log.e("ACTIVITY_DELETE", "Error al registrar actividad: " + t.getMessage(), t);
             }
         });
     }
+
+    private void registrarActividadEliminacionManga(String titulo, String imagen) {
+        int userId = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE).getInt("user_id", -1);
+        if (userId == -1) return;
+
+        Map<String, Object> actividad = new HashMap<>();
+        actividad.put("userId", userId);
+        actividad.put("action", "eliminó un manga");
+        actividad.put("mediaTitle", titulo);
+        actividad.put("imageUrl", imagen);
+
+        api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                Log.d("ACTIVITY_DELETE", "Actividad de eliminación registrada");
+
+                if (getParentFragment() instanceof FragmentProfile) {
+                    ((FragmentProfile) getParentFragment()).loadActivity();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.e("ACTIVITY_DELETE", "Error al registrar actividad: " + t.getMessage(), t);
+            }
+        });
+    }
+
+
 }

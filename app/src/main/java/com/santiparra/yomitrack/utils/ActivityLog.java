@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class ActivityLog {
 
+    @SerializedName("id")
+    private int id;
     @SerializedName("action")
     private String action;
 
@@ -13,16 +15,26 @@ public class ActivityLog {
     @SerializedName("timestamp")
     private String timestamp;
 
-    @SerializedName("imagenUrl")
+    @SerializedName("imageUrl")
     private String imageUrl;
+
+    public int getId() {
+        return id;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public String getMediaTitle() {
+        return mediaTitle;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
 
     public String getImageUrl() {
         return imageUrl;
     }
-
-    public String getAction() { return action; }
-
-    public String getMediaTitle() { return mediaTitle; }
-
-    public String getTimestamp() { return timestamp; }
 }

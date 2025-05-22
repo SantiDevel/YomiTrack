@@ -7,6 +7,7 @@ import com.santiparra.yomitrack.db.entities.UserEntity;
 import com.santiparra.yomitrack.model.AniListMedia;
 import com.santiparra.yomitrack.model.AnimePageResponse;
 import com.santiparra.yomitrack.model.ApiResponse;
+import com.santiparra.yomitrack.model.CommentModel;
 import com.santiparra.yomitrack.model.LoginResponse;
 import com.santiparra.yomitrack.model.MangaPageResponse;
 import com.santiparra.yomitrack.model.RegisterResponse;
@@ -22,6 +23,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -32,6 +34,7 @@ public interface ApiService {
     // ---------------- Usuario ----------------
     @POST("users/register")
     Call<RegisterResponse> registerUser(@Body UserEntity user);
+
     @POST("users/login")
     Call<LoginResponse> loginUser(@Body UserEntity user);
 
@@ -83,8 +86,27 @@ public interface ApiService {
 
     @GET("api/activity/list/{userId}")
     Call<List<ActivityLog>> getActivityLog(@Path("userId") int userId);
+
+    @GET("api/activity/comments/{activityId}")
+    Call<List<CommentModel>> getCommentsByActivity(@Path("activityId") int activityId);
+
+    @GET("/api/activity/like/{userId}/{activityId}")
+    Call<JsonObject> checkLike(
+            @Path("userId") int userId,
+            @Path("activityId") int activityId
+    );
+
+    @POST("api/activity/like")
+    Call<JsonObject> postLike(@Body JsonObject body);
+
+    @POST("api/activity/comment")
+    Call<JsonObject> postComment(@Body JsonObject body);
+
     @POST("api/activity/add")
     Call<JsonObject> postActivity(@Body Map<String, Object> body);
+
+    @HTTP(method = "DELETE", path = "api/activity/like/remove", hasBody = true)
+    Call<JsonObject> deleteLike(@Body JsonObject body);
 
 
     // ---------------- AniList API ----------------

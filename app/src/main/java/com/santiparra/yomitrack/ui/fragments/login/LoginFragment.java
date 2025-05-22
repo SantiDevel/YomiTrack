@@ -80,7 +80,6 @@ public class LoginFragment extends Fragment {
             }
         });
     }
-
     private void loginAsGuest() {
         saveUserSession(-1, "Invitado");
         goToMainActivity();

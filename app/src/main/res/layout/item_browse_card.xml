@@ -11,7 +11,7 @@
         android:layout_height="170dp"
         android:scaleType="centerCrop"
         android:clipToOutline="true"
-        android:background="@drawable/sample_cover" />
+        />
 
     <TextView
         android:id="@+id/textViewTitle"

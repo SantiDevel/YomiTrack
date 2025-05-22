@@ -76,8 +76,8 @@ public class FragmentHome extends Fragment {
         activityRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         fullRecentActivity.addAll(Arrays.asList(
-                new RecentActivityModel("Midca", "Read chapters 1 - 60 of", "Choujun! Choujou Senpai", "4 minutes ago", "https://i.imgur.com/7tZ0h8R.jpg"),
-                new RecentActivityModel("prtrncyon", "Scored 9/10 on", "Chainsaw Man", "12 hours ago", "https://cdn.myanimelist.net/images/manga/2/253146.jpg")
+                //new RecentActivityModel("Midca", "Read chapters 1 - 60 of", "Choujun! Choujou Senpai", "4 minutes ago", "https://i.imgur.com/7tZ0h8R.jpg"),
+                //new RecentActivityModel("prtrncyon", "Scored 9/10 on", "Chainsaw Man", "12 hours ago", "https://cdn.myanimelist.net/images/manga/2/253146.jpg")
                 // ... más datos simulados aquí
         ));
 

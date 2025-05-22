@@ -7,6 +7,8 @@
     <string name="profile">\n</string>
     <string name="write_a_status">Write a status...</string>
     <string name="show_more" />
+    <string name="cover_image" />
+    <string name="like_comment" />
     <string-array name="media_types">
         <item>Anime</item>
         <item>Manga</item>
