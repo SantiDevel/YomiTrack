@@ -6,6 +6,13 @@ public class ActivityLog {
 
     @SerializedName("id")
     private int id;
+
+    @SerializedName("userId")
+    private int userId;
+
+    @SerializedName("username")
+    private String username;
+
     @SerializedName("action")
     private String action;
 
@@ -20,6 +27,14 @@ public class ActivityLog {
 
     public int getId() {
         return id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public String getAction() {

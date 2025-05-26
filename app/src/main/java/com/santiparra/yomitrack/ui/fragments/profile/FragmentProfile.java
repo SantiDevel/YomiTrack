@@ -25,7 +25,6 @@ import com.santiparra.yomitrack.model.UserStatsResponse;
 import com.santiparra.yomitrack.utils.ActivityLog;
 import com.santiparra.yomitrack.utils.DateUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -91,9 +90,6 @@ public class FragmentProfile extends Fragment {
         editBiography.setText(bioPrefs.getString(BIO_KEY, ""));
 
         api = ApiClient.getClient().create(ApiService.class);
-
-        loadStats();
-        loadActivity();
     }
 
     private void setupListeners() {
@@ -122,24 +118,19 @@ public class FragmentProfile extends Fragment {
 
     private void populateStats(LinearLayout container, Map<String, Integer> stats) {
         container.removeAllViews();
-
         if (stats == null || stats.isEmpty()) {
             addTextToContainer(container, "No hay estadísticas disponibles");
             return;
         }
-
         int total = stats.values().stream().mapToInt(Integer::intValue).sum();
         LayoutInflater inflater = LayoutInflater.from(getContext());
-
         for (Map.Entry<String, Integer> entry : stats.entrySet()) {
             View statView = inflater.inflate(R.layout.item_stat_bar, container, false);
             TextView label = statView.findViewById(R.id.statLabelFull);
             ProgressBar bar = statView.findViewById(R.id.statProgressBar);
-
             label.setText(String.format(Locale.getDefault(), "%s • %d", entry.getKey(), entry.getValue()));
             bar.setProgress(total > 0 ? (entry.getValue() * 100 / total) : 0);
             bar.setProgressTintList(ColorStateList.valueOf(getColorForStatus(entry.getKey())));
-
             container.addView(statView);
         }
     }
@@ -153,18 +144,12 @@ public class FragmentProfile extends Fragment {
 
     private int getColorForStatus(String status) {
         switch (status.toLowerCase(Locale.ROOT)) {
-            case "watching":
-                return requireContext().getColor(R.color.status_watching);
-            case "completed":
-                return requireContext().getColor(R.color.status_completed);
-            case "paused":
-                return requireContext().getColor(R.color.status_paused);
-            case "dropped":
-                return requireContext().getColor(R.color.status_dropped);
-            case "planning":
-                return requireContext().getColor(R.color.status_planning);
-            default:
-                return requireContext().getColor(R.color.gray);
+            case "watching": return requireContext().getColor(R.color.status_watching);
+            case "completed": return requireContext().getColor(R.color.status_completed);
+            case "paused": return requireContext().getColor(R.color.status_paused);
+            case "dropped": return requireContext().getColor(R.color.status_dropped);
+            case "planning": return requireContext().getColor(R.color.status_planning);
+            default: return requireContext().getColor(R.color.gray);
         }
     }
 
@@ -175,19 +160,14 @@ public class FragmentProfile extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     activityContainer.removeAllViews();
                     LayoutInflater inflater = LayoutInflater.from(getContext());
-
                     for (ActivityLog log : response.body()) {
                         View card = inflater.inflate(R.layout.item_activity_card, activityContainer, false);
-
                         LinearLayout commentsContainer = card.findViewById(R.id.commentsContainer);
-
                         commentsContainer.setVisibility(View.GONE);
 
                         card.setOnClickListener(v -> {
                             if (commentsContainer.getVisibility() == View.VISIBLE) {
-                                commentsContainer.animate().alpha(0).setDuration(150).withEndAction(() -> {
-                                    commentsContainer.setVisibility(View.GONE);
-                                }).start();
+                                commentsContainer.animate().alpha(0).setDuration(150).withEndAction(() -> commentsContainer.setVisibility(View.GONE)).start();
                             } else {
                                 commentsContainer.setAlpha(0);
                                 commentsContainer.setVisibility(View.VISIBLE);
@@ -203,20 +183,14 @@ public class FragmentProfile extends Fragment {
 
                         ImageView coverImage = card.findViewById(R.id.activityCover);
                         if (!TextUtils.isEmpty(log.getImageUrl())) {
-                            Glide.with(requireContext())
-                                    .load(log.getImageUrl())
-                                    .placeholder(R.drawable.placeholder_image)
-                                    .error(R.drawable.placeholder_image)
-                                    .into(coverImage);
+                            Glide.with(requireContext()).load(log.getImageUrl()).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).into(coverImage);
                         }
 
                         ImageButton commentButton = card.findViewById(R.id.commentButton);
                         ImageButton likeButton = card.findViewById(R.id.likeButton);
 
                         commentButton.setOnClickListener(v -> {
-                            CommentDialog dialog = new CommentDialog(requireContext(), userId, log.getId(), () -> {
-                                loadComments(log.getId(), card.findViewById(R.id.commentsContainer));
-                            });
+                            CommentDialog dialog = new CommentDialog(requireContext(), userId, log.getId(), () -> loadComments(log.getId(), commentsContainer));
                             dialog.show();
                         });
 
@@ -226,47 +200,25 @@ public class FragmentProfile extends Fragment {
                                 if (response.isSuccessful() && response.body() != null) {
                                     final boolean[] isLiked = {response.body().get("liked").getAsBoolean()};
                                     actualizarCorazon(likeButton, isLiked[0]);
-
                                     likeButton.setOnClickListener(v -> {
-                                        if (isLiked[0]) {
-                                            api.deleteLike(createLikeJson(userId, log.getId())).enqueue(new Callback<JsonObject>() {
-                                                @Override
-                                                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                                                    if (response.isSuccessful()) {
-                                                        isLiked[0] = false;
-                                                        actualizarCorazon(likeButton, false);
-                                                    }
-                                                }
-
-                                                @Override
-                                                public void onFailure(Call<JsonObject> call, Throwable t) {
-                                                    Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
-                                                }
+                                        boolean newLike = !isLiked[0];
+                                        isLiked[0] = newLike;
+                                        if (newLike) {
+                                            api.postLike(createLikeJson(userId, log.getId())).enqueue(new Callback<JsonObject>() {
+                                                @Override public void onResponse(Call<JsonObject> call, Response<JsonObject> response) { actualizarCorazon(likeButton, true); }
+                                                @Override public void onFailure(Call<JsonObject> call, Throwable t) {}
                                             });
                                         } else {
-                                            api.postLike(createLikeJson(userId, log.getId())).enqueue(new Callback<JsonObject>() {
-                                                @Override
-                                                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                                                    if (response.isSuccessful()) {
-                                                        isLiked[0] = true;
-                                                        actualizarCorazon(likeButton, true);
-                                                    }
-                                                }
-
-                                                @Override
-                                                public void onFailure(Call<JsonObject> call, Throwable t) {
-                                                    Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
-                                                }
+                                            api.deleteLike(createLikeJson(userId, log.getId())).enqueue(new Callback<JsonObject>() {
+                                                @Override public void onResponse(Call<JsonObject> call, Response<JsonObject> response) { actualizarCorazon(likeButton, false); }
+                                                @Override public void onFailure(Call<JsonObject> call, Throwable t) {}
                                             });
                                         }
                                     });
                                 }
                             }
-
                             @Override
-                            public void onFailure(Call<JsonObject> call, Throwable t) {
-                                Toast.makeText(getContext(), "Error al verificar like", Toast.LENGTH_SHORT).show();
-                            }
+                            public void onFailure(Call<JsonObject> call, Throwable t) {}
                         });
 
                         activityContainer.addView(card);
@@ -287,24 +239,19 @@ public class FragmentProfile extends Fragment {
             Toast.makeText(getContext(), "Escribe algo primero", Toast.LENGTH_SHORT).show();
             return;
         }
-
         Map<String, Object> post = new HashMap<>();
         post.put("userId", userId);
         post.put("action", "publicó");
         post.put("mediaTitle", status);
-
         api.postActivity(post).enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+            @Override public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 if (response.isSuccessful()) {
                     editStatus.setText("");
                     loadActivity();
                     Toast.makeText(getContext(), "Publicado", Toast.LENGTH_SHORT).show();
                 }
             }
-
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
+            @Override public void onFailure(Call<JsonObject> call, Throwable t) {
                 Toast.makeText(getContext(), "Error al publicar", Toast.LENGTH_SHORT).show();
             }
         });
@@ -312,61 +259,78 @@ public class FragmentProfile extends Fragment {
 
     private void loadComments(int activityId, LinearLayout container) {
         api.getCommentsByActivity(activityId).enqueue(new Callback<List<CommentModel>>() {
-            @Override
-            public void onResponse(Call<List<CommentModel>> call, Response<List<CommentModel>> response) {
+            @Override public void onResponse(Call<List<CommentModel>> call, Response<List<CommentModel>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     container.removeAllViews();
                     LayoutInflater inflater = LayoutInflater.from(getContext());
-
                     for (CommentModel comment : response.body()) {
-                        View commentView = LayoutInflater.from(getContext())
-                                .inflate(R.layout.item_comment, container, false);
-
-                        TextView usernameView = commentView.findViewById(R.id.commentUsername);
-                        TextView commentText = commentView.findViewById(R.id.commentText);
-                        TextView dateView = commentView.findViewById(R.id.commentDate);
-                        ImageView avatar = commentView.findViewById(R.id.commentAvatar);
-
-                        usernameView.setText(comment.getUsername());
-                        commentText.setText(comment.getText());
-                        dateView.setText(DateUtils.getRelativeTime(comment.getCreatedAt())); // usa tu util
-
+                        View view = inflater.inflate(R.layout.item_comment, container, false);
+                        ((TextView) view.findViewById(R.id.commentUsername)).setText(comment.getUsername());
+                        ((TextView) view.findViewById(R.id.commentText)).setText(comment.getText());
+                        ((TextView) view.findViewById(R.id.commentDate)).setText(DateUtils.getRelativeTime(comment.getCreatedAt()));
+                        ImageView avatar = view.findViewById(R.id.commentAvatar);
                         if (!TextUtils.isEmpty(comment.getAvatarUrl())) {
-                            Glide.with(getContext())
-                                    .load(comment.getAvatarUrl())
-                                    .placeholder(R.drawable.rectangle_placeholder)
-                                    .error(R.drawable.error_image)
-                                    .into(avatar);
+                            Glide.with(requireContext()).load(comment.getAvatarUrl()).placeholder(R.drawable.rectangle_placeholder).error(R.drawable.error_image).into(avatar);
                         }
 
-                        container.addView(commentView);
-                    }
+                        ImageButton replyButton = view.findViewById(R.id.replyButton);
+                        replyButton.setOnClickListener(v -> {
+                            CommentDialog dialog = new CommentDialog(requireContext(), userId, activityId, () -> loadComments(activityId, container), comment.getUsername());
+                            dialog.show();
+                        });
 
+                        ImageButton likeButton = view.findViewById(R.id.commentLikeButton);
+                        api.checkLike(userId, comment.getId()).enqueue(new Callback<JsonObject>() {
+                            @Override public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    final boolean[] isLiked = {response.body().get("liked").getAsBoolean()};
+                                    actualizarCorazon(likeButton, isLiked[0]);
+
+                                    likeButton.setOnClickListener(v -> {
+                                        boolean newLike = !isLiked[0];
+                                        isLiked[0] = newLike;
+
+                                        if (newLike) {
+                                            api.postLike(createLikeJson(userId, comment.getId())).enqueue(new Callback<JsonObject>() {
+                                                @Override public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                                                    actualizarCorazon(likeButton, true);
+                                                }
+                                                @Override public void onFailure(Call<JsonObject> call, Throwable t) {}
+                                            });
+                                        } else {
+                                            api.deleteLike(createLikeJson(userId, comment.getId())).enqueue(new Callback<JsonObject>() {
+                                                @Override public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                                                    actualizarCorazon(likeButton, false);
+                                                }
+                                                @Override public void onFailure(Call<JsonObject> call, Throwable t) {}
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                            @Override public void onFailure(Call<JsonObject> call, Throwable t) {}
+                        });
+
+                        container.addView(view);
+                    }
                 }
             }
-
-            @Override
-            public void onFailure(Call<List<CommentModel>> call, Throwable t) {
+            @Override public void onFailure(Call<List<CommentModel>> call, Throwable t) {
                 Toast.makeText(getContext(), "Error al cargar comentarios", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private JsonObject createLikeJson(int userId, int activityId) {
-        JsonObject body = new JsonObject();
-        body.addProperty("userId", userId);
-        body.addProperty("activityId", activityId);
-        return body;
+    private JsonObject createLikeJson(int userId, int targetId) {
+        JsonObject json = new JsonObject();
+        json.addProperty("userId", userId);
+        json.addProperty("commentId", targetId);
+        return json;
     }
 
-    private void actualizarCorazon(ImageButton likeButton, boolean liked) {
-        if (liked) {
-            likeButton.setImageResource(R.drawable.ic_heart_filled);
-            likeButton.setColorFilter(requireContext().getColor(R.color.pink));
-        } else {
-            likeButton.setImageResource(R.drawable.ic_heart_outline);
-            likeButton.setColorFilter(requireContext().getColor(R.color.gray));
-        }
+    private void actualizarCorazon(ImageButton btn, boolean liked) {
+        btn.setImageResource(liked ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+        btn.setColorFilter(requireContext().getColor(liked ? R.color.pink : R.color.gray));
     }
 
     private void saveBiography() {

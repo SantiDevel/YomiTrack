@@ -53,6 +53,9 @@ public interface ApiService {
             @Query("size") int size
     );
 
+    @GET("anime/airing")
+    Call<List<AnimeEntity>> getAiringAnime();
+
     @PUT("anime/{id}")
     Call<ApiResponse> updateAnime(@Path("id") int animeId, @Body AnimeEntity anime);
 
@@ -71,6 +74,12 @@ public interface ApiService {
             @Path("userId") int userId,
             @Query("page") int page,
             @Query("size") int size
+    );
+
+    @GET("manga/user/{userId}/status/{status}")
+    Call<List<MangaEntity>> getMangaByUserAndStatus(
+            @Path("userId") int userId,
+            @Path("status") String status
     );
 
     @PUT("manga/{id}")
@@ -94,6 +103,12 @@ public interface ApiService {
     Call<JsonObject> checkLike(
             @Path("userId") int userId,
             @Path("activityId") int activityId
+    );
+
+    @GET("anime/user/{userId}/status/{status}")
+    Call<List<AnimeEntity>> getAnimeByUserAndStatus(
+            @Path("userId") int userId,
+            @Path("status") String status
     );
 
     @POST("api/activity/like")

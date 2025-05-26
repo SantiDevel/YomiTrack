@@ -17,6 +17,19 @@ public class AnimeEntity implements Serializable {
     private String imageUrl;
     private int totalEpisodes;
 
+    public AnimeEntity() {
+    }
+
+    public AnimeEntity(int id, String title, String status, int userId, String imageUrl, int progress, int score, int totalEpisodes) {
+        this.id = id;
+        this.title = title;
+        this.status = status;
+        this.userId = userId;
+        this.imageUrl = imageUrl;
+        this.progress = progress;
+        this.score = score;
+        this.totalEpisodes = totalEpisodes;
+    }
 
     // Getters y Setters
     public int getId() {

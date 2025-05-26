@@ -17,6 +17,20 @@ public class MangaEntity implements Serializable {
     private String imageUrl;
     private int totalChapters;
 
+    public MangaEntity() {
+    }
+
+    public MangaEntity(int id, String title, String status, int userId, String imageUrl, int progress, int score, int totalChapters) {
+        this.id = id;
+        this.title = title;
+        this.status = status;
+        this.userId = userId;
+        this.imageUrl = imageUrl;
+        this.progress = progress;
+        this.score = score;
+        this.totalChapters = totalChapters;
+    }
+
     // Getters y Setters
 
     public int getId() {

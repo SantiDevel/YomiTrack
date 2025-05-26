@@ -4,66 +4,81 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="center_vertical"
     android:padding="8dp"
+    android:gravity="top"
     android:background="@color/primary">
 
     <!-- Avatar del usuario -->
     <ImageView
         android:id="@+id/commentAvatar"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:scaleType="centerCrop"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:src="@drawable/ic_profile"
+        android:scaleType="centerCrop"
         android:layout_marginEnd="8dp"
-        android:background="@drawable/circle_mask" />
+        android:background="@drawable/circle_mask"
+        android:clipToOutline="true" />
 
     <!-- Contenido del comentario -->
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <!-- Nombre del usuario -->
         <TextView
             android:id="@+id/commentUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Username"
+            android:text="Usuario"
             android:textStyle="bold"
-            android:textSize="13sp" />
+            android:textColor="@color/textPrimary"
+            android:textSize="14sp" />
 
-        <!-- Texto del comentario -->
         <TextView
             android:id="@+id/commentText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Comentario aquí"
+            android:text="Comentario de prueba"
             android:textColor="@color/textPrimary"
             android:textSize="14sp"
-            android:lineSpacingExtra="2dp"
-            android:maxLines="5"
-            android:ellipsize="end"
-            android:paddingEnd="8dp" />
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp" />
 
-        <!-- Fecha -->
-        <TextView
-            android:id="@+id/commentDate"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="hace 5 min"
-            android:textSize="11sp"
-            android:textColor="@color/gray" />
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-    <!-- Botón de like -->
-    <ImageButton
-        android:id="@+id/commentLikeButton"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:src="@drawable/ic_heart"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/like_comment"
-        app:tint="@color/gray" />
+            <TextView
+                android:id="@+id/commentDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hace 5 min"
+                android:textSize="12sp"
+                android:textColor="@color/gray" />
+
+            <ImageButton
+                android:id="@+id/commentLikeButton"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/ic_heart"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/like_comment"
+                app:tint="@color/gray" />
+
+            <!-- Botón opcional para responder -->
+            <ImageButton
+                android:id="@+id/replyButton"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_reply"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Responder comentario"
+                app:tint="@color/gray" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

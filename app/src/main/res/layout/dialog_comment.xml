@@ -1,20 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="16dp"
+    android:id="@+id/commentDialogLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="?android:attr/windowBackground">
 
     <EditText
         android:id="@+id/commentInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Escribe tu comentario" />
+        android:hint="Escribe tu comentario..."
+        android:minHeight="80dp"
+        android:gravity="top|start"
+        android:inputType="textMultiLine"
+        android:maxLines="5"
+        android:background="@color/primary"
+        android:padding="12dp"
+        android:textColor="@color/textPrimary"
+        android:textColorHint="@color/textPrimary"
+        android:textSize="15sp" />
 
     <Button
         android:id="@+id/sendComment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enviar"
+        android:textAllCaps="false"
         android:layout_gravity="end"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@android:color/white" />
+
 </LinearLayout>

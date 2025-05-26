@@ -1,69 +1,72 @@
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scrollView"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:fitsSystemWindows="true"
-    android:background="@color/background"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="16dp">
+    android:padding="16dp">
 
+    <!-- Título y spinner -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:layout_marginTop="75dp"
+        android:gravity="center_vertical">
 
-        <!-- Espaciador reducido -->
-        <View
-            android:id="@+id/statusBarSpacer"
-            android:layout_width="match_parent"
-            android:layout_height="12dp" />
+        <TextView
+            android:text="Browse"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
 
-        <!-- Encabezado -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Spinner
+            android:id="@+id/spinnerType"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:backgroundTint="@android:color/white"
+            android:popupBackground="@color/primary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewBrowse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Browse"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@color/textPrimary"
-                android:layout_marginEnd="8dp" />
+    <!-- Caja de búsqueda -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_search_box"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:padding="12dp">
 
-            <Spinner
-                android:id="@+id/spinnerType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary" />
-        </LinearLayout>
+        <ImageView
+            android:src="@android:drawable/ic_menu_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:tint="@android:color/darker_gray" />
 
-        <!-- Buscador -->
         <EditText
             android:id="@+id/editTextSearch"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
-            android:hint="Search"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:background="@drawable/edittext_background"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:textColor="@color/textPrimary"
-            android:textColorHint="@color/textPrimary" />
-
-        <!-- Contenedor de secciones -->
-        <LinearLayout
-            android:id="@+id/sectionContainer"
+            android:hint="Buscar..."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp" />
+            android:paddingStart="8dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:background="@android:color/transparent"/>
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+
+    <!-- Resultados -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewResults"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"/>
+</LinearLayout>

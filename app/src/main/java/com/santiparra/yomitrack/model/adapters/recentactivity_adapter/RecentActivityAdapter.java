@@ -9,18 +9,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.santiparra.yomitrack.R;
 import com.santiparra.yomitrack.model.CommentDialog;
 import com.santiparra.yomitrack.model.CommentModel;
 import com.santiparra.yomitrack.model.RecentActivityModel;
+
 import java.util.List;
 
 public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAdapter.ActivityViewHolder> {
-    private final List<RecentActivityModel> activityList;
 
-    public RecentActivityAdapter(List<RecentActivityModel> activityList) {
+    private List<RecentActivityModel> activityList;
+    private final int currentUserId;
+
+    public RecentActivityAdapter(List<RecentActivityModel> activityList, int currentUserId) {
         this.activityList = activityList;
+        this.currentUserId = currentUserId;
     }
 
     @NonNull
@@ -33,7 +38,8 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
     @Override
     public void onBindViewHolder(@NonNull ActivityViewHolder holder, int position) {
         RecentActivityModel activity = activityList.get(position);
-        holder.user.setText(activity.user);
+
+        holder.user.setText(activity.getUser());
         holder.action.setText(activity.action);
         holder.title.setText(activity.title);
         holder.time.setText(activity.time);
@@ -44,34 +50,86 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
                 .into(holder.image);
 
         holder.commentContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(holder.itemView.getContext());
 
-        if (holder.commentContainer != null) {
-            holder.commentContainer.removeAllViews();
+        for (CommentModel comment : activity.comments) {
+            View commentView = inflater.inflate(R.layout.item_comment, holder.commentContainer, false);
 
-            for (CommentModel comment : activity.comments) {
-                View commentView = LayoutInflater.from(holder.itemView.getContext())
-                        .inflate(R.layout.item_comment, holder.commentContainer, false);
+            TextView usernameView = commentView.findViewById(R.id.commentUsername);
+            TextView commentText = commentView.findViewById(R.id.commentText);
+            TextView dateView = commentView.findViewById(R.id.commentDate);
+            ImageView avatar = commentView.findViewById(R.id.commentAvatar);
+            ImageButton likeButton = commentView.findViewById(R.id.commentLikeButton);
+            ImageButton replyButton = commentView.findViewById(R.id.replyButton);
 
-                TextView commentText = commentView.findViewById(R.id.commentText);
-                ImageButton commentLike = commentView.findViewById(R.id.commentLikeButton);
+            usernameView.setText(comment.getUsername());
+            commentText.setText(comment.getText());
+            dateView.setText(comment.getCreatedAt());
 
-                commentText.setText(comment.text);
-                commentLike.setImageResource(comment.liked ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-                commentLike.setColorFilter(comment.liked
-                        ? holder.itemView.getContext().getColor(R.color.pink)
-                        : holder.itemView.getContext().getColor(R.color.textPrimary));
+            Glide.with(commentView.getContext())
+                    .load(comment.getAvatarUrl())
+                    .placeholder(R.drawable.rectangle_placeholder)
+                    .error(R.drawable.error_image)
+                    .into(avatar);
 
-                commentLike.setOnClickListener(v -> {
-                    comment.liked = !comment.liked;
-                    commentLike.setImageResource(comment.liked ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-                    commentLike.setColorFilter(comment.liked
-                            ? holder.itemView.getContext().getColor(R.color.pink)
-                            : holder.itemView.getContext().getColor(R.color.textPrimary));
-                });
+            likeButton.setImageResource(comment.isLiked() ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+            likeButton.setColorFilter(commentView.getContext().getColor(comment.isLiked() ? R.color.pink : R.color.gray));
 
-                holder.commentContainer.addView(commentView);
-            }
+            likeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean newLike = !comment.isLiked();
+                    comment.setLiked(newLike);
+                    likeButton.setImageResource(newLike ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+                    likeButton.setColorFilter(commentView.getContext().getColor(newLike ? R.color.pink : R.color.gray));
+                }
+            });
+
+            replyButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int adapterPos = holder.getAdapterPosition();
+                    if (adapterPos == RecyclerView.NO_POSITION) return;
+                    RecentActivityModel activityItem = activityList.get(adapterPos);
+                    CommentDialog dialog = new CommentDialog(
+                            holder.itemView.getContext(),
+                            currentUserId,
+                            activityItem.getId(),
+                            () -> notifyItemChanged(adapterPos),
+                            comment.getUsername()
+                    );
+                    dialog.show();
+                }
+            });
+
+            holder.commentContainer.addView(commentView);
         }
+
+        holder.commentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int adapterPos = holder.getAdapterPosition();
+                if (adapterPos == RecyclerView.NO_POSITION) return;
+                RecentActivityModel activityItem = activityList.get(adapterPos);
+                CommentDialog dialog = new CommentDialog(
+                        holder.itemView.getContext(),
+                        currentUserId,
+                        activityItem.getId(),
+                        () -> notifyItemChanged(adapterPos)
+                );
+                dialog.show();
+            }
+        });
+
+        holder.likeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activity.liked = !activity.liked;
+                holder.likeButton.setImageResource(activity.liked ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+                holder.likeButton.setColorFilter(holder.itemView.getContext().getColor(
+                        activity.liked ? R.color.pink : R.color.textPrimary));
+            }
+        });
     }
 
     @Override
@@ -79,12 +137,16 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
         return activityList.size();
     }
 
-    class ActivityViewHolder extends RecyclerView.ViewHolder {
+    public void updateData(List<RecentActivityModel> newList) {
+        this.activityList = newList;
+        notifyDataSetChanged();
+    }
+
+    static class ActivityViewHolder extends RecyclerView.ViewHolder {
         TextView user, action, title, time;
         ImageView image;
         ImageButton likeButton, commentButton;
         LinearLayout commentContainer;
-        boolean isLiked = false;
 
         public ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,24 +157,7 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
             image = itemView.findViewById(R.id.activityCover);
             likeButton = itemView.findViewById(R.id.likeButton);
             commentButton = itemView.findViewById(R.id.commentButton);
-            commentContainer = itemView.findViewById(R.id.commentsContainer); // <- protección aplicada
-
-            likeButton.setOnClickListener(v -> {
-                isLiked = !isLiked;
-                likeButton.setImageResource(isLiked ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-                likeButton.setColorFilter(isLiked
-                        ? itemView.getContext().getColor(R.color.pink)
-                        : itemView.getContext().getColor(R.color.textPrimary));
-            });
-
-            commentButton.setOnClickListener(v -> {
-                RecentActivityModel activity = activityList.get(getAdapterPosition());
-                int activityId = activity.getId();
-                int userId = this.user.getId();
-
-                CommentDialog dialog = new CommentDialog(itemView.getContext(), userId, activityId, () -> {});
-                dialog.show();
-            });
+            commentContainer = itemView.findViewById(R.id.commentsContainer);
         }
     }
 }

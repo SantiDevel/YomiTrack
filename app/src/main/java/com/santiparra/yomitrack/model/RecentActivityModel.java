@@ -1,35 +1,40 @@
 package com.santiparra.yomitrack.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Modelo de actividad reciente para mostrar acciones de usuario.
- */
 public class RecentActivityModel {
-    public int activityId; // ← agregar esto
-    public String user;
-    public String action;
-    public String title;
-    public String time;
-    public String imageUrl;
-    public List<CommentModel> comments = new ArrayList<>();
 
-    public RecentActivityModel(int activityId, String user, String action, String title, String time, String imageUrl) {
-        this.activityId = activityId;
+    private final int id;
+    private final int userId;
+    private final String user;
+    public final String action;
+    public final String title;
+    public final String imageUrl;
+    public final String time;
+    public final List<CommentModel> comments;
+    public boolean liked;
+
+    public RecentActivityModel(int id, int userId, String user, String action, String title, String imageUrl, String time, List<CommentModel> comments, boolean liked) {
+        this.id = id;
+        this.userId = userId;
         this.user = user;
         this.action = action;
         this.title = title;
-        this.time = time;
         this.imageUrl = imageUrl;
-    }
-
-    public void addComment(CommentModel comment) {
-        comments.add(comment);
+        this.time = time;
+        this.comments = comments;
+        this.liked = liked;
     }
 
     public int getId() {
-        return activityId;
+        return id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public String getUser() {
+        return user;
     }
 }
-

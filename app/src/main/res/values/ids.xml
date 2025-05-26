@@ -56,4 +56,8 @@
     <item name="commentButton" type="id" />
     <item name="likeButton" type="id" />
     <item name="activityCover" type="id" />
+    <item name="itemTitle" type="id" />
+    <item name="btnAdd" type="id" />
+    <item name="itemImage" type="id" />
+    <item name="commentDialogLayout" type="id" />
 </resources>
