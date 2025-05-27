@@ -1,8 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="@color/background"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,10 +14,10 @@
         android:orientation="vertical"
         android:paddingBottom="32dp">
 
-        <!-- Encabezado: Cover, Avatar y Nombre -->
+        <!-- Encabezado -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="150dp">
 
             <ImageView
                 android:id="@+id/coverImage"
@@ -42,90 +46,114 @@
                 android:layout_marginStart="12dp"
                 android:layout_toEndOf="@id/avatarImage"
                 android:text="BtwIsSanti"
-                android:textColor="@color/textPrimary"
+                android:textColor="@android:color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
         </RelativeLayout>
 
-
-        <!-- Biografía -->
-        <EditText
-            android:id="@+id/editBiography"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/edittext_background"
-            android:hint="Escribe tu biografía aquí"
-            android:inputType="textMultiLine"
-            android:minLines="3" />
-
-        <Button
-            android:id="@+id/buttonSaveBio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Guardar Biografía" />
-
-        <!-- Estadísticas de Anime -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Anime Stats"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
+        <!-- Contenido con márgenes -->
         <LinearLayout
-            android:id="@+id/animeStatsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
 
-        <!-- Estadísticas de Manga -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Manga Stats"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            <!-- Biografía -->
+            <EditText
+                android:id="@+id/editBiography"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/edit_text_background"
+                android:hint="Escribe tu biografía aquí"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"
+                android:inputType="textMultiLine"
+                android:minLines="2"
+                android:maxLines="5"
+                android:textSize="14sp" />
 
-        <LinearLayout
-            android:id="@+id/mangaStatsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="vertical" />
+            <Button
+                android:id="@+id/buttonSaveBio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Guardar Biografía" />
 
-        <!-- Estado / Pensamiento -->
-        <EditText
-            android:id="@+id/editStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/edittext_background"
-            android:hint="¿Qué estás pensando?"
-            android:inputType="text" />
+            <!-- Anime Stats -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Anime Stats"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white" />
 
-        <Button
-            android:id="@+id/buttonPostStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Publicar Estado" />
+            <LinearLayout
+                android:id="@+id/animeStatsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical" />
 
-        <!-- Actividad reciente -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Actividad Reciente"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            <!-- Manga Stats -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Manga Stats"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white" />
 
+            <LinearLayout
+                android:id="@+id/mangaStatsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical" />
+
+            <!-- Estado -->
+            <EditText
+                android:id="@+id/editStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/edit_text_background"
+                android:hint="¿Qué estás pensando?"
+                android:inputType="text"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/buttonPostStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Publicar Estado" />
+
+            <!-- Actividad Reciente -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Actividad Reciente"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
+
+        <!-- ¡ESTO es lo nuevo! El contenedor alineado con el título -->
         <LinearLayout
             android:id="@+id/activityContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
     </LinearLayout>
 </ScrollView>

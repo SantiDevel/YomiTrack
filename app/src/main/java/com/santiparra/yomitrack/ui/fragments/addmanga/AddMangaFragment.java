@@ -74,15 +74,22 @@ public class AddMangaFragment extends Fragment {
 
     private void setupSpinners() {
         ArrayAdapter<CharSequence> statusAdapter = ArrayAdapter.createFromResource(
-                requireContext(), R.array.manga_status_array, android.R.layout.simple_spinner_item);
-        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                requireContext(),
+                R.array.manga_status_array,
+                R.layout.item_spinner // ✅ texto blanco para ítem seleccionado
+        );
+        statusAdapter.setDropDownViewResource(R.layout.item_spinner); // ✅ también para el desplegable
         statusSpinner.setAdapter(statusAdapter);
 
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
-                requireContext(), R.array.manga_type_array, android.R.layout.simple_spinner_item);
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                requireContext(),
+                R.array.manga_type_array,
+                R.layout.item_spinner
+        );
+        typeAdapter.setDropDownViewResource(R.layout.item_spinner);
         typeSpinner.setAdapter(typeAdapter);
     }
+
 
     private void setupRecycler() {
         searchAdapter = new MangaSearchAdapter(new ArrayList<>(), this::onMangaSelected);

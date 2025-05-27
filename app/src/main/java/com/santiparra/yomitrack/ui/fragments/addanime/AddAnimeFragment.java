@@ -75,13 +75,19 @@ public class AddAnimeFragment extends Fragment {
 
     private void setupSpinners() {
         ArrayAdapter<CharSequence> statusAdapter = ArrayAdapter.createFromResource(
-                requireContext(), R.array.anime_status_array, android.R.layout.simple_spinner_item);
-        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                requireContext(),
+                R.array.anime_status_array,
+                R.layout.item_spinner
+        );
+        statusAdapter.setDropDownViewResource(R.layout.item_spinner); // ✅ blanco también al desplegar
         statusSpinner.setAdapter(statusAdapter);
 
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
-                requireContext(), R.array.anime_type_array, android.R.layout.simple_spinner_item);
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                requireContext(),
+                R.array.anime_type_array,
+                R.layout.item_spinner
+        );
+        typeAdapter.setDropDownViewResource(R.layout.item_spinner);
         typeSpinner.setAdapter(typeAdapter);
     }
 

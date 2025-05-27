@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,8 +51,13 @@ public class CommentDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_comment);
 
-        editComment = findViewById(R.id.commentInput);
-        buttonSend = findViewById(R.id.sendComment);
+        getWindow().setLayout(
+                (int)(getContext().getResources().getDisplayMetrics().widthPixels * 0.9),
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        editComment = findViewById(R.id.editComment);
+        buttonSend = findViewById(R.id.buttonSend);
         api = ApiClient.getClient().create(ApiService.class);
 
         // Prefill @usuario si es respuesta

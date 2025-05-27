@@ -19,7 +19,9 @@
             android:background="@drawable/edit_text_background"
             android:hint="Título del anime"
             android:inputType="text"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white" />
 
         <EditText
             android:id="@+id/editTextScore"
@@ -27,7 +29,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="Puntuación (0-100)"
-            android:inputType="number" />
+            android:inputType="number"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white" />
 
         <EditText
             android:id="@+id/editTextProgress"
@@ -35,21 +39,25 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="Progreso (episodios vistos)"
-            android:inputType="number" />
+            android:inputType="number"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white" />
 
         <Spinner
             android:id="@+id/spinnerStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:popupBackground="@color/primary" />
 
         <Spinner
             android:id="@+id/spinnerType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:popupBackground="@color/primary" />
 
         <Button
             android:id="@+id/buttonSaveAnime"

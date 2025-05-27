@@ -12,19 +12,6 @@
         android:contentDescription="Portada"
         android:scaleType="centerCrop" />
 
-    <!-- Progreso en esquina inferior izquierda -->
-    <TextView
-        android:id="@+id/textProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="6dp"
-        android:background="@android:color/transparent"
-        android:text="6/12"
-        android:textColor="#FF4444"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
     <!-- Título con fondo oscuro -->
     <TextView
         android:id="@+id/textTitle"

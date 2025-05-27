@@ -64,10 +64,12 @@ public class EditMangaFragment extends Fragment {
         String[] statusArray = getResources().getStringArray(R.array.manga_status_array);
         String[] typeArray = getResources().getStringArray(R.array.manga_type_array);
 
-        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, statusArray);
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, statusArray);
+        statusAdapter.setDropDownViewResource(R.layout.item_spinner);
         spinnerStatus.setAdapter(statusAdapter);
 
-        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, typeArray);
+        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, typeArray);
+        typeAdapter.setDropDownViewResource(R.layout.item_spinner);
         spinnerType.setAdapter(typeAdapter);
 
         for (int i = 0; i < statusArray.length; i++) {

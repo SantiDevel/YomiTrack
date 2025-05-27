@@ -61,17 +61,26 @@ public class FragmentBrowse extends Fragment {
         recyclerViewResults = view.findViewById(R.id.recyclerViewResults);
         recyclerViewResults.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // ✅ Aseguramos que el Spinner tenga las opciones
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, new String[]{"Anime", "Manga"});
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                requireContext(),
+                R.layout.item_spinner_large,
+                new String[]{"Anime", "Manga"}
+        );
+        spinnerAdapter.setDropDownViewResource(R.layout.item_spinner_large);
         spinnerType.setAdapter(spinnerAdapter);
-
+        
         editTextSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
                 handler.removeCallbacks(searchRunnable);
             }
-            @Override public void afterTextChanged(Editable s) {
+
+            @Override
+            public void afterTextChanged(Editable s) {
                 searchRunnable = () -> performSearch(s.toString());
                 handler.postDelayed(searchRunnable, 500);
             }

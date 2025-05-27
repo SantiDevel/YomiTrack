@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
             android:text="Watching"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -43,18 +44,18 @@
             android:textStyle="bold"
             android:textColor="@color/textPrimary" />
 
+        <!-- EditText para estado -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerManga"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="16dp"
             android:clipToPadding="false"
             android:nestedScrollingEnabled="false"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp" />
 
-        <!-- EditText para estado -->
         <EditText
             android:id="@+id/inputStatus"
             android:layout_width="match_parent"

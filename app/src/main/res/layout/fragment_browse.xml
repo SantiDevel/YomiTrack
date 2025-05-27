@@ -1,72 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="@color/background"
+    android:fillViewport="true"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="true">
 
-    <!-- Título y spinner -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="75dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <TextView
-            android:text="Browse"
-            android:textStyle="bold"
-            android:textSize="24sp"
-            android:textColor="@android:color/white"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
-
-        <Spinner
-            android:id="@+id/spinnerType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@android:color/white"
-            android:popupBackground="@color/primary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
-    </LinearLayout>
-
-    <!-- Caja de búsqueda -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_search_box"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp"
-        android:padding="12dp">
-
-        <ImageView
-            android:src="@android:drawable/ic_menu_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:tint="@android:color/darker_gray" />
-
-        <EditText
-            android:id="@+id/editTextSearch"
-            android:hint="Buscar..."
+        <!-- Título y spinner -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white"
-            android:background="@android:color/transparent"/>
-    </LinearLayout>
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-    <!-- Resultados -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewResults"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="16dp"/>
-</LinearLayout>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Browse"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spinnerType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:backgroundTint="@android:color/white"
+                android:minHeight="48dp"
+                android:popupBackground="@color/primary"
+                android:spinnerMode="dropdown"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+        </LinearLayout>
+
+        <!-- Caja de búsqueda -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_search_box"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="@android:color/darker_gray" />
+
+            <EditText
+                android:id="@+id/editTextSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:hint="Buscar..."
+                android:paddingStart="8dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white" />
+        </LinearLayout>
+
+        <!-- Resultados -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewResults"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:paddingBottom="16dp" />
+    </LinearLayout>
+</ScrollView>

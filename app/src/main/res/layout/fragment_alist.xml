@@ -76,10 +76,11 @@
                 android:layout_weight="1"
                 android:background="@drawable/edit_text_background"
                 android:hint="Buscar anime..."
+                android:textColorHint="@android:color/white"
                 android:inputType="text"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
-                android:textColor="@android:color/black"
+                android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
             <ImageButton

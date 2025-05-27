@@ -25,6 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Título"
+            android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -33,21 +34,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Estado"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/status_blue"
             android:textSize="14sp" />
 
         <TextView
             android:id="@+id/textScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Score: 80"
+            android:text="Score: 0"
+            android:textColor="@android:color/white"
             android:textSize="14sp" />
 
         <TextView
             android:id="@+id/textProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Progreso: 10 eps"
+            android:text="Progreso: 0 eps"
+            android:textColor="@android:color/white"
             android:textSize="14sp" />
 
 
@@ -56,6 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Tipo: TV"
+            android:textColor="@android:color/white"
             android:textSize="14sp" />
     </LinearLayout>
 </LinearLayout>

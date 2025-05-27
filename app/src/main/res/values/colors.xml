@@ -6,6 +6,7 @@
     <color name="gray">#808080</color>
     <color name="activeTint">#F26D50</color>
     <color name="pink">#FF4081</color>
+    <color name="status_blue">#3DB4F2</color>
 
     <!-- Colores por estado anime -->
     <color name="status_completed">#4CAF50</color> <!-- verde -->

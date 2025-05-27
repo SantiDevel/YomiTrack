@@ -40,6 +40,7 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:text="Usuario"
+                    android:textColor="@android:color/white"
                     android:textSize="14sp" />
 
                 <TextView
@@ -47,6 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="completó"
+                    android:textColor="@android:color/white"
                     android:textSize="13sp" />
 
                 <TextView
@@ -54,6 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Nombre del anime o manga"
+                    android:textColor="@android:color/white"
                     android:textSize="13sp"
                     android:maxLines="2"
                     android:ellipsize="end" />
@@ -64,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:text="hace 3 horas"
                     android:textSize="12sp"
-                    android:textColor="@color/gray"
+                    android:textColor="@color/status_blue"
                     android:layout_marginTop="4dp" />
             </LinearLayout>
 
