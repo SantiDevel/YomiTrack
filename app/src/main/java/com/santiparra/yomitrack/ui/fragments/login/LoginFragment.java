@@ -66,7 +66,9 @@ public class LoginFragment extends Fragment {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    saveUserSession(response.body().getUser().getId(), response.body().getUser().getUsername());
+                    int userId = response.body().getUser().getId();
+                    String username = response.body().getUser().getUsername();
+                    saveUserSession(userId, username, false);
                     showToast("Inicio de sesión exitoso");
                     goToMainActivity();
                 } else {
@@ -80,14 +82,18 @@ public class LoginFragment extends Fragment {
             }
         });
     }
+
     private void loginAsGuest() {
-        saveUserSession(-1, "Invitado");
+        saveUserSession(-1, "Invitado", true);
+        showToast("Sesión como invitado");
         goToMainActivity();
     }
 
-    private void saveUserSession(int userId, String username) {
+    private void saveUserSession(int userId, String username, boolean isGuest) {
         SharedPreferences prefs = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
         prefs.edit()
+                .putBoolean("is_logged_in", true)
+                .putBoolean("guest", isGuest)
                 .putInt("user_id", userId)
                 .putString("username", username)
                 .apply();
