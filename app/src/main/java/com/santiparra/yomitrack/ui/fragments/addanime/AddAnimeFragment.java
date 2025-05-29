@@ -139,13 +139,19 @@ public class AddAnimeFragment extends Fragment {
         AnimeEntity anime = new AnimeEntity();
         anime.setUserId(userId);
         anime.setTitle(selected.getTitle());
-        anime.setImageUrl(selected.getImageUrl());
+
+        // ✅ Si no hay imagen, se usa una predeterminada
+        if (selected.getImageUrl() == null || selected.getImageUrl().isEmpty()) {
+            selectedImageUrl = "android.resource://" + requireContext().getPackageName() + "/" + R.drawable.sample_cover;
+        } else {
+            selectedImageUrl = selected.getImageUrl();
+        }
+
+        anime.setImageUrl(selectedImageUrl);
         anime.setStatus(status);
         anime.setType(type);
         anime.setScore(score);
         anime.setProgress(progress);
-
-        selectedImageUrl = selected.getImageUrl();
 
         api.insertAnime(anime).enqueue(new Callback<ApiResponse>() {
             @Override

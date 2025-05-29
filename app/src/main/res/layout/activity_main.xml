@@ -64,5 +64,4 @@
         app:itemTextColor="@color/textPrimary"
         app:labelVisibilityMode="selected"
         app:menu="@menu/bottom_menu" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

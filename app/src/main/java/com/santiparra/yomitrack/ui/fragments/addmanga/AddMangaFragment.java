@@ -139,13 +139,18 @@ public class AddMangaFragment extends Fragment {
         MangaEntity manga = new MangaEntity();
         manga.setUserId(userId);
         manga.setTitle(selected.getTitle());
-        manga.setImageUrl(selected.getImageUrl());
+
+        if (selected.getImageUrl() == null || selected.getImageUrl().isEmpty()) {
+            selectedImageUrl = "android.resource://" + requireContext().getPackageName() + "/" + R.drawable.sample_cover;
+        } else {
+            selectedImageUrl = selected.getImageUrl();
+        }
+
+        manga.setImageUrl(selectedImageUrl);
         manga.setStatus(status);
         manga.setType(type);
         manga.setScore(score);
         manga.setProgress(progress);
-
-        selectedImageUrl = selected.getImageUrl();
 
         api.insertManga(manga).enqueue(new Callback<ApiResponse>() {
             @Override
