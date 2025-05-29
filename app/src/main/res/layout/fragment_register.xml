@@ -1,37 +1,73 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/registerFragmentContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:background="@color/background"> <!-- Fondo oscuro tipo AniList -->
 
-    <!-- Usuario -->
-    <EditText
-        android:id="@+id/editTextUsernameRegister"
-        android:hint="Nuevo usuario"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName" />
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_register_card"
+        android:elevation="6dp"
+        android:gravity="center_horizontal">
 
-    <!-- Correo electrónico -->
-    <EditText
-        android:id="@+id/editEmail"
-        android:hint="Correo electrónico"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress" />
+        <!-- Logo en la parte superior -->
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="24dp"
+            android:src="@drawable/logo_yomitrack"
+            android:contentDescription="Logo YomiTrack" />
 
-    <!-- Contraseña -->
-    <EditText
-        android:id="@+id/editTextPasswordRegister"
-        android:hint="Contraseña"
-        android:inputType="textPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <!-- Campo: Usuario -->
+        <EditText
+            android:id="@+id/editTextUsernameRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nuevo usuario"
+            android:inputType="textPersonName"
+            android:textColorHint="@color/textPrimary"
+            android:textColor="@color/textPrimary"
+            android:backgroundTint="@color/textPrimary"
+            android:layout_marginBottom="16dp" />
 
-    <!-- Botón de registro -->
-    <Button
-        android:id="@+id/buttonRegister"
-        android:text="Registrarse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        <!-- Campo: Correo -->
+        <EditText
+            android:id="@+id/editEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Correo electrónico"
+            android:inputType="textEmailAddress"
+            android:textColorHint="@color/textPrimary"
+            android:textColor="@color/textPrimary"
+            android:backgroundTint="@color/textPrimary"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Campo: Contraseña -->
+        <EditText
+            android:id="@+id/editTextPasswordRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Contraseña"
+            android:inputType="textPassword"
+            android:textColorHint="@color/textPrimary"
+            android:textColor="@color/textPrimary"
+            android:backgroundTint="@color/textPrimary"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Botón de registro -->
+        <Button
+            android:id="@+id/buttonRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="REGISTRARSE"
+            android:textAllCaps="true"
+            android:backgroundTint="#56C8F5"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</FrameLayout>

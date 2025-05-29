@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -78,6 +79,10 @@ public class FragmentManga extends Fragment {
             Toast.makeText(getContext(), "Error: sesión no iniciada", Toast.LENGTH_SHORT).show();
             return;
         }
+        // Mostrar el nombre del usuario
+        String username = prefs.getString("username", "Usuario");
+        TextView textViewUsername = view.findViewById(R.id.textViewUsername);
+        textViewUsername.setText(username);
 
         setViewType(currentViewType);
         loadMoreMangas(currentPage);
