@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.santiparra.yomitrack.ui.MainActivity;
+import com.santiparra.yomitrack.ui.fragments.login.LoginActivity;
 
 /**
  * Actividad inicial que decide si ir a LoginActivity o directamente a MainActivity.
@@ -16,20 +18,21 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Espera 1.5 segundos antes de navegar
+        // Espera 1.5 segundos antes de decidir a dónde ir
         new Handler().postDelayed(() -> {
-            SharedPreferences prefs = getSharedPreferences("user_session", MODE_PRIVATE);
-            boolean isLoggedIn = prefs.getBoolean("is_logged_in", false);
+            SharedPreferences sharedPreferences = getSharedPreferences("user_session", MODE_PRIVATE);
+            int userId = sharedPreferences.getInt("user_id", -1);
+            String username = sharedPreferences.getString("username", null);
 
-            if (isLoggedIn) {
-                // Usuario ya ha iniciado sesión previamente
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+            if (userId != -1 && username != null) {
+                // Sesión activa → MainActivity
+                startActivity(new Intent(this, MainActivity.class));
             } else {
-                // Ir a login si no ha iniciado sesión
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+                // No hay sesión → Login
+                startActivity(new Intent(this, LoginActivity.class));
             }
 
-            finish();
-        }, 1500); // 1.5 segundos (puedes ajustar el tiempo)
+            finish(); // cerrar splash
+        }, 1500);
     }
 }

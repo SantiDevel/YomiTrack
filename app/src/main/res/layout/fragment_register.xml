@@ -4,12 +4,23 @@
     android:orientation="vertical"
     android:padding="24dp">
 
+    <!-- Usuario -->
     <EditText
         android:id="@+id/editTextUsernameRegister"
         android:hint="Nuevo usuario"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName" />
 
+    <!-- Correo electrónico -->
+    <EditText
+        android:id="@+id/editEmail"
+        android:hint="Correo electrónico"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textEmailAddress" />
+
+    <!-- Contraseña -->
     <EditText
         android:id="@+id/editTextPasswordRegister"
         android:hint="Contraseña"
@@ -17,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <!-- Botón de registro -->
     <Button
         android:id="@+id/buttonRegister"
         android:text="Registrarse"

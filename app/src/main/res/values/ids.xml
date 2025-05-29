@@ -60,4 +60,5 @@
     <item name="btnAdd" type="id" />
     <item name="itemImage" type="id" />
     <item name="commentDialogLayout" type="id" />
+    <item name="editTextUsernameRegister" type="id" />
 </resources>

@@ -31,23 +31,25 @@ public class LoginFragment extends Fragment {
 
     private FragmentLoginBinding binding;
 
-    public LoginFragment() {
-        // Required empty public constructor
-    }
+    public LoginFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentLoginBinding.inflate(inflater, container, false);
+        initListeners();
+        return binding.getRoot();
+    }
 
+    private void initListeners() {
         binding.buttonLogin.setOnClickListener(v -> loginUser());
         binding.buttonGuest.setOnClickListener(v -> loginAsGuest());
-        binding.buttonGoRegister.setOnClickListener(v -> {
-            NavController navController = NavHostFragment.findNavController(LoginFragment.this);
-            navController.navigate(R.id.action_loginFragment_to_registerFragment);
-        });
-
-        return binding.getRoot();
+        binding.buttonGoRegister.setOnClickListener(v ->
+                navigateTo(R.id.action_loginFragment_to_registerFragment)
+        );
+        binding.textForgotPassword.setOnClickListener(v ->
+                navigateTo(R.id.action_loginFragment_to_forgotPasswordFragment)
+        );
     }
 
     private void loginUser() {
@@ -64,15 +66,20 @@ public class LoginFragment extends Fragment {
 
         apiService.loginUser(user).enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    int userId = response.body().getUser().getId();
-                    String username = response.body().getUser().getUsername();
-                    saveUserSession(userId, username, false);
-                    showToast("Inicio de sesión exitoso");
-                    goToMainActivity();
+            public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse loginResponse = response.body();
+                    if (loginResponse.isSuccess()) {
+                        saveUserSession(loginResponse.getUser().getId(), loginResponse.getUser().getUsername());
+                        showToast("Inicio de sesión exitoso");
+                        goToMainActivity();
+                    } else {
+                        showToast("Credenciales incorrectas");
+                    }
+                } else if (response.code() == 403) {
+                    showToast("Tu correo no ha sido verificado");
                 } else {
-                    showToast("Credenciales incorrectas");
+                    showToast("Error de autenticación");
                 }
             }
 
@@ -84,16 +91,13 @@ public class LoginFragment extends Fragment {
     }
 
     private void loginAsGuest() {
-        saveUserSession(-1, "Invitado", true);
-        showToast("Sesión como invitado");
+        saveUserSession(-1, "Invitado");
         goToMainActivity();
     }
 
-    private void saveUserSession(int userId, String username, boolean isGuest) {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
-        prefs.edit()
-                .putBoolean("is_logged_in", true)
-                .putBoolean("guest", isGuest)
+    private void saveUserSession(int userId, String username) {
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        sharedPreferences.edit()
                 .putInt("user_id", userId)
                 .putString("username", username)
                 .apply();
@@ -104,8 +108,13 @@ public class LoginFragment extends Fragment {
         requireActivity().finish();
     }
 
+    private void navigateTo(int destinationId) {
+        NavController navController = NavHostFragment.findNavController(this);
+        navController.navigate(destinationId);
+    }
+
     private void showToast(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -76,9 +76,9 @@ public class AddMangaFragment extends Fragment {
         ArrayAdapter<CharSequence> statusAdapter = ArrayAdapter.createFromResource(
                 requireContext(),
                 R.array.manga_status_array,
-                R.layout.item_spinner // ✅ texto blanco para ítem seleccionado
+                R.layout.item_spinner
         );
-        statusAdapter.setDropDownViewResource(R.layout.item_spinner); // ✅ también para el desplegable
+        statusAdapter.setDropDownViewResource(R.layout.item_spinner);
         statusSpinner.setAdapter(statusAdapter);
 
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(

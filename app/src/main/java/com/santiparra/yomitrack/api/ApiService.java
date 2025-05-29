@@ -14,7 +14,7 @@ import com.santiparra.yomitrack.model.RegisterResponse;
 import com.santiparra.yomitrack.model.UserStatsResponse;
 import com.santiparra.yomitrack.utils.ActivityLog;
 
-import org.json.JSONObject;
+
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,8 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.HTTP;
 import retrofit2.http.POST;
@@ -37,6 +39,18 @@ public interface ApiService {
 
     @POST("users/login")
     Call<LoginResponse> loginUser(@Body UserEntity user);
+
+    @FormUrlEncoded
+    @POST("users/forgot-password")
+    Call<ApiResponse> forgotPassword(@Field("email") String email);
+
+    @FormUrlEncoded
+    @POST("users/reset-password")
+    Call<ApiResponse> resetPassword(
+            @Field("email") String email,
+            @Field("token") String token,
+            @Field("newPassword") String newPassword
+    );
 
     // ---------------- Anime ----------------
     @POST("anime/add")

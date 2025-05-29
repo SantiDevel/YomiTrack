@@ -93,8 +93,9 @@ public class MainActivity extends AppCompatActivity {
                     .setTitle("Cerrar sesión")
                     .setMessage("¿Deseas cerrar sesión?")
                     .setPositiveButton("Sí", (dialog, which) -> {
-                        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-                        prefs.edit().remove("current_user_id").apply();
+                        SharedPreferences prefs = getSharedPreferences("user_session", MODE_PRIVATE);
+                        prefs.edit().clear().apply(); // ← ¡esto borra la sesión real!
+
                         startActivity(new Intent(MainActivity.this, LoginActivity.class)
                                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                     })
