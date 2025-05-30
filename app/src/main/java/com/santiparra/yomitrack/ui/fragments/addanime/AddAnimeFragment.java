@@ -140,7 +140,6 @@ public class AddAnimeFragment extends Fragment {
         anime.setUserId(userId);
         anime.setTitle(selected.getTitle());
 
-        // ✅ Si no hay imagen, se usa una predeterminada
         if (selected.getImageUrl() == null || selected.getImageUrl().isEmpty()) {
             selectedImageUrl = "android.resource://" + requireContext().getPackageName() + "/" + R.drawable.sample_cover;
         } else {

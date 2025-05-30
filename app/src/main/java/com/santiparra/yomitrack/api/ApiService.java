@@ -56,9 +56,6 @@ public interface ApiService {
     @POST("anime/add")
     Call<ApiResponse> insertAnime(@Body AnimeEntity anime);
 
-    @GET("anime/list/{userId}")
-    Call<List<AnimeEntity>> getAnimeByUser(@Path("userId") int userId);
-
     // Scroll infinito: obtener lista paginada
     @GET("/anime/list/{userId}")
     Call<AnimePageResponse> getAnimes(
@@ -66,9 +63,6 @@ public interface ApiService {
             @Query("page") int page,
             @Query("size") int size
     );
-
-    @GET("anime/airing")
-    Call<List<AnimeEntity>> getAiringAnime();
 
     @PUT("anime/{id}")
     Call<ApiResponse> updateAnime(@Path("id") int animeId, @Body AnimeEntity anime);
@@ -79,9 +73,6 @@ public interface ApiService {
     // ---------------- Manga ----------------
     @POST("manga/add")
     Call<ApiResponse> insertManga(@Body MangaEntity manga);
-
-    @GET("manga/list/{userId}")
-    Call<List<MangaEntity>> getMangaByUser(@Path("userId") int userId);
 
     @GET("/manga/list/{userId}")
     Call<MangaPageResponse> getMangas(
