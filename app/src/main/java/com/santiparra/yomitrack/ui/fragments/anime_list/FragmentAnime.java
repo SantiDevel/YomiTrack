@@ -59,15 +59,12 @@ public class FragmentAnime extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_alist, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view,
-                              @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         initViews(view);
@@ -76,6 +73,7 @@ public class FragmentAnime extends Fragment {
         setupSearchListener();
         setupFab(view);
         setupInsets(view);
+        setupResultListener();
 
         SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
         userId = prefs.getInt("user_id", -1);
@@ -84,7 +82,7 @@ public class FragmentAnime extends Fragment {
             Toast.makeText(getContext(), "Error: sesión no iniciada", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Mostrar el nombre del usuario
+
         String username = prefs.getString("username", "Usuario");
         TextView textViewUsername = view.findViewById(R.id.textViewUsername);
         textViewUsername.setText(username);
@@ -119,6 +117,30 @@ public class FragmentAnime extends Fragment {
                 if (!isLoading && (firstVisibleItemPosition + visibleItemCount) >= totalItemCount - 4) {
                     currentPage++;
                     loadMoreAnimes(currentPage);
+                }
+            }
+        });
+    }
+
+    private void setupResultListener() {
+        getParentFragmentManager().setFragmentResultListener("anime_add_request", this, (requestKey, bundle) -> {
+            if (bundle.getBoolean("anime_added", false)) {
+                currentPage = 1;
+                animeList.clear();
+                adapter.updateList(new ArrayList<>());
+                loadMoreAnimes(currentPage);
+            }
+        });
+
+        getParentFragmentManager().setFragmentResultListener("anime_delete_request", this, (requestKey, bundle) -> {
+            int deletedId = bundle.getInt("anime_id", -1);
+            if (deletedId != -1) {
+                for (int i = 0; i < animeList.size(); i++) {
+                    if (animeList.get(i).getId() == deletedId) {
+                        animeList.remove(i);
+                        adapter.updateList(animeList);
+                        break;
+                    }
                 }
             }
         });
@@ -197,9 +219,8 @@ public class FragmentAnime extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    currentPage = 1;
-                    animeList.clear();
-                    loadMoreAnimes(currentPage);
+                    animeList.remove(anime);
+                    adapter.updateList(animeList);
                 } else {
                     Toast.makeText(requireContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
                 }
@@ -225,8 +246,15 @@ public class FragmentAnime extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     List<AnimeEntity> nuevos = response.body().getData();
-                    animeList.addAll(nuevos);
-                    adapter.notifyItemRangeInserted(animeList.size() - nuevos.size(), nuevos.size());
+                    if (page == 1) {
+                        animeList.clear();
+                        animeList.addAll(nuevos);
+                        adapter.updateList(animeList);
+                    } else {
+                        int start = animeList.size();
+                        animeList.addAll(nuevos);
+                        adapter.notifyItemRangeInserted(start, nuevos.size());
+                    }
                     isLoading = response.body().isHasNextPage();
                 } else {
                     isLoading = false;

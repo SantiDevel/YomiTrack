@@ -90,7 +90,6 @@ public class AddMangaFragment extends Fragment {
         typeSpinner.setAdapter(typeAdapter);
     }
 
-
     private void setupRecycler() {
         searchAdapter = new MangaSearchAdapter(new ArrayList<>(), this::onMangaSelected);
         searchResults.setAdapter(searchAdapter);
@@ -98,8 +97,7 @@ public class AddMangaFragment extends Fragment {
 
     private void setupSearch() {
         searchEditText.setOnEditorActionListener((TextView v, int actionId, KeyEvent event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String query = searchEditText.getText().toString().trim();
                 if (!query.isEmpty()) {
                     api.searchAniList(query, "MANGA").enqueue(new Callback<List<AniListMedia>>() {
@@ -133,8 +131,7 @@ public class AddMangaFragment extends Fragment {
         try {
             score = Integer.parseInt(scoreEditText.getText().toString());
             progress = Integer.parseInt(progressEditText.getText().toString());
-        } catch (NumberFormatException ignored) {
-        }
+        } catch (NumberFormatException ignored) {}
 
         MangaEntity manga = new MangaEntity();
         manga.setUserId(userId);
@@ -158,6 +155,9 @@ public class AddMangaFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(getContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     registrarActividad(manga.getTitle());
+                    Bundle result = new Bundle();
+                    result.putBoolean("manga_added", true);
+                    getParentFragmentManager().setFragmentResult("manga_add_request", result);
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
                     Toast.makeText(getContext(), "Error al guardar manga", Toast.LENGTH_SHORT).show();
@@ -180,11 +180,7 @@ public class AddMangaFragment extends Fragment {
 
         api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
             @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                if (!response.isSuccessful()) {
-                    // Puedes logear el error si lo deseas
-                }
-            }
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {}
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {

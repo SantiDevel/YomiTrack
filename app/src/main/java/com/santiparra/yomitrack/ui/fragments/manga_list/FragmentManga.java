@@ -70,6 +70,7 @@ public class FragmentManga extends Fragment {
         initViews(view);
         setupListeners();
         setupRecyclerView();
+        setupResultListeners();
 
         api = ApiClient.getClient().create(ApiService.class);
         SharedPreferences prefs = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE);
@@ -79,10 +80,9 @@ public class FragmentManga extends Fragment {
             Toast.makeText(getContext(), "Error: sesión no iniciada", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Mostrar el nombre del usuario
+
         String username = prefs.getString("username", "Usuario");
-        TextView textViewUsername = view.findViewById(R.id.textViewUsername);
-        textViewUsername.setText(username);
+        ((TextView) view.findViewById(R.id.textViewUsername)).setText(username);
 
         setViewType(currentViewType);
         loadMoreMangas(currentPage);
@@ -151,15 +151,37 @@ public class FragmentManga extends Fragment {
         });
     }
 
+    private void setupResultListeners() {
+        getParentFragmentManager().setFragmentResultListener("manga_add_request", this, (key, bundle) -> {
+            if (bundle.getBoolean("manga_added", false)) {
+                currentPage = 1;
+                mangaList.clear();
+                adapter.updateList(new ArrayList<>());
+                loadMoreMangas(currentPage);
+            }
+        });
+
+        getParentFragmentManager().setFragmentResultListener("manga_delete_request", this, (key, bundle) -> {
+            int deletedId = bundle.getInt("manga_id", -1);
+            if (deletedId != -1) {
+                for (int i = 0; i < mangaList.size(); i++) {
+                    if (mangaList.get(i).getId() == deletedId) {
+                        mangaList.remove(i);
+                        adapter.notifyItemRemoved(i);
+                        break;
+                    }
+                }
+            }
+        });
+    }
+
     private void setViewType(int viewType) {
         currentViewType = viewType;
-
         if (viewType == MangaAdapter.VIEW_LARGE) {
             recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         } else {
             recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         }
-
         adapter = new MangaAdapter(mangaList, viewType, this::showEditDialog, this::deleteManga);
         recyclerView.setAdapter(adapter);
     }
@@ -187,12 +209,15 @@ public class FragmentManga extends Fragment {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (!isAdded()) return;
-
                 if (response.isSuccessful()) {
+                    for (int i = 0; i < mangaList.size(); i++) {
+                        if (mangaList.get(i).getId() == manga.getId()) {
+                            mangaList.remove(i);
+                            adapter.notifyItemRemoved(i);
+                            break;
+                        }
+                    }
                     Toast.makeText(requireContext(), response.body() != null ? response.body().getMessage() : "Manga eliminado", Toast.LENGTH_SHORT).show();
-                    currentPage = 1;
-                    mangaList.clear();
-                    loadMoreMangas(currentPage);
                 } else {
                     Toast.makeText(requireContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
                 }
@@ -214,7 +239,6 @@ public class FragmentManga extends Fragment {
             @Override
             public void onResponse(Call<MangaPageResponse> call, Response<MangaPageResponse> response) {
                 if (!isAdded()) return;
-
                 if (response.isSuccessful() && response.body() != null) {
                     List<MangaEntity> nuevos = response.body().getData();
                     mangaList.addAll(nuevos);

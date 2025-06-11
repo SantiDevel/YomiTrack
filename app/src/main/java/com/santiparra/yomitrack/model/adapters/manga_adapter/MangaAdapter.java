@@ -1,6 +1,5 @@
 package com.santiparra.yomitrack.model.adapters.manga_adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,17 +16,41 @@ import com.santiparra.yomitrack.db.entities.MangaEntity;
 
 import java.util.List;
 
+/**
+ * Adaptador para mostrar una lista de mangas en un RecyclerView con distintos tipos de vista:
+ * normal, compacta y grande. Soporta clics normales y prolongados.
+ */
 public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHolder> {
 
+    /** Vista estándar. */
     public static final int VIEW_NORMAL = 0;
+
+    /** Vista compacta. */
     public static final int VIEW_COMPACT = 1;
+
+    /** Vista grande. */
     public static final int VIEW_LARGE = 2;
 
+    /** Lista de mangas a mostrar. */
     private List<MangaEntity> mangaList;
+
+    /** Tipo de vista actual. */
     private int viewType;
+
+    /** Listener para clic corto (edición). */
     private final OnMangaClickListener onEditClick;
+
+    /** Listener para clic prolongado (acciones extendidas). */
     private final OnMangaClickListener onLongClick;
 
+    /**
+     * Constructor del adaptador.
+     *
+     * @param mangaList    lista de mangas a mostrar.
+     * @param viewType     tipo de vista deseado.
+     * @param onEditClick  callback para clics normales.
+     * @param onLongClick  callback para clics prolongados.
+     */
     public MangaAdapter(List<MangaEntity> mangaList, int viewType,
                         OnMangaClickListener onEditClick,
                         OnMangaClickListener onLongClick) {
@@ -124,21 +147,51 @@ public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHol
         });
     }
 
+    /**
+     * Devuelve la cantidad de mangas en la lista.
+     *
+     * @return número total de ítems.
+     */
     @Override
     public int getItemCount() {
         return mangaList != null ? mangaList.size() : 0;
     }
 
+    /**
+     * Devuelve el tipo de vista para el ítem en la posición dada.
+     *
+     * @param position posición del ítem.
+     * @return tipo de vista.
+     */
     @Override
     public int getItemViewType(int position) {
         return viewType;
     }
 
+    /**
+     * Reemplaza la lista actual por una nueva y actualiza el adaptador.
+     *
+     * @param newList nueva lista de mangas.
+     */
+    public void updateList(List<MangaEntity> newList) {
+        mangaList.clear();
+        mangaList.addAll(newList);
+        notifyDataSetChanged();
+    }
+
+    /**
+     * ViewHolder para representar un ítem de manga en el RecyclerView.
+     */
     public static class MangaViewHolder extends RecyclerView.ViewHolder {
         ImageView imageCover;
         TextView textTitle, textStatus, textProgress, textScore, textType;
         View statusDot;
 
+        /**
+         * Constructor del ViewHolder.
+         *
+         * @param itemView vista inflada del ítem.
+         */
         public MangaViewHolder(@NonNull View itemView) {
             super(itemView);
             imageCover = itemView.findViewById(R.id.imageCover);
@@ -151,12 +204,15 @@ public class MangaAdapter extends RecyclerView.Adapter<MangaAdapter.MangaViewHol
         }
     }
 
-    public void updateList(List<MangaEntity> newList) {
-        this.mangaList = newList;
-        notifyDataSetChanged();
-    }
-
+    /**
+     * Interfaz para manejar clics sobre ítems de manga.
+     */
     public interface OnMangaClickListener {
+        /**
+         * Se ejecuta cuando se hace clic en un manga.
+         *
+         * @param manga el ítem clicado.
+         */
         void onClick(MangaEntity manga);
     }
 }

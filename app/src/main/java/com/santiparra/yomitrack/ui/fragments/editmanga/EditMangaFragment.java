@@ -61,30 +61,18 @@ public class EditMangaFragment extends Fragment {
 
         fillFields();
 
-        String[] statusArray = getResources().getStringArray(R.array.manga_status_array);
-        String[] typeArray = getResources().getStringArray(R.array.manga_type_array);
-
-        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, statusArray);
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner,
+                getResources().getStringArray(R.array.manga_status_array));
         statusAdapter.setDropDownViewResource(R.layout.item_spinner);
         spinnerStatus.setAdapter(statusAdapter);
 
-        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, typeArray);
+        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner,
+                getResources().getStringArray(R.array.manga_type_array));
         typeAdapter.setDropDownViewResource(R.layout.item_spinner);
         spinnerType.setAdapter(typeAdapter);
 
-        for (int i = 0; i < statusArray.length; i++) {
-            if (statusArray[i].equalsIgnoreCase(manga.getStatus())) {
-                spinnerStatus.setSelection(i);
-                break;
-            }
-        }
-
-        for (int i = 0; i < typeArray.length; i++) {
-            if (typeArray[i].equalsIgnoreCase(manga.getType())) {
-                spinnerType.setSelection(i);
-                break;
-            }
-        }
+        setSpinnerSelection(spinnerStatus, manga.getStatus());
+        setSpinnerSelection(spinnerType, manga.getType());
 
         buttonSave.setOnClickListener(v -> saveChanges());
 
@@ -102,6 +90,15 @@ public class EditMangaFragment extends Fragment {
         editTextTitle.setText(manga.getTitle());
         editTextScore.setText(String.valueOf(manga.getScore()));
         editTextProgress.setText(String.valueOf(manga.getProgress()));
+    }
+
+    private void setSpinnerSelection(Spinner spinner, String value) {
+        for (int i = 0; i < spinner.getCount(); i++) {
+            if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(value)) {
+                spinner.setSelection(i);
+                break;
+            }
+        }
     }
 
     private void saveChanges() {
@@ -128,14 +125,11 @@ public class EditMangaFragment extends Fragment {
             return;
         }
 
-        String status = spinnerStatus.getSelectedItem().toString();
-        String type = spinnerType.getSelectedItem().toString();
-
         manga.setTitle(title);
         manga.setScore(score);
         manga.setProgress(progress);
-        manga.setStatus(status);
-        manga.setType(type);
+        manga.setStatus(spinnerStatus.getSelectedItem().toString());
+        manga.setType(spinnerType.getSelectedItem().toString());
 
         api.updateManga(manga.getId(), manga).enqueue(new Callback<ApiResponse>() {
             @Override
@@ -144,7 +138,7 @@ public class EditMangaFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    registrarActividad(manga.getTitle(), manga.getImageUrl());
+                    registrarActividad("update de un manga", manga.getTitle(), manga.getImageUrl());
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
                     requireActivity().getSupportFragmentManager().popBackStack();
@@ -162,7 +156,7 @@ public class EditMangaFragment extends Fragment {
     }
 
     private void deleteManga() {
-        registrarActividadEliminacionManga(manga.getTitle(), manga.getImageUrl());
+        registrarActividad("eliminó un manga", manga.getTitle(), manga.getImageUrl());
 
         api.deleteManga(manga.getId()).enqueue(new Callback<ApiResponse>() {
             @Override
@@ -173,6 +167,12 @@ public class EditMangaFragment extends Fragment {
                     Toast.makeText(requireContext(), "Manga eliminado", Toast.LENGTH_SHORT).show();
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
+
+                    Bundle result = new Bundle();
+                    result.putBoolean("manga_deleted", true);
+                    result.putInt("manga_id", manga.getId());
+                    getParentFragmentManager().setFragmentResult("manga_delete_request", result);
+
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
                     Toast.makeText(requireContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
@@ -187,44 +187,20 @@ public class EditMangaFragment extends Fragment {
         });
     }
 
-    private void registrarActividad(String titulo, String imagen) {
+    private void registrarActividad(String action, String titulo, String imagen) {
         int userId = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE).getInt("user_id", -1);
         if (userId == -1) return;
 
         Map<String, Object> actividad = new HashMap<>();
         actividad.put("userId", userId);
-        actividad.put("action", "update de un manga");
+        actividad.put("action", action);
         actividad.put("mediaTitle", titulo);
         actividad.put("imageUrl", imagen);
 
         api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                Log.d("ACTIVITY_DELETE", "Actividad de edicion registrada");
-            }
-
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-                Log.e("ACTIVITY_DELETE", "Error al registrar actividad: " + t.getMessage(), t);
-            }
-        });
-    }
-
-    private void registrarActividadEliminacionManga(String titulo, String imagen) {
-        int userId = requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE).getInt("user_id", -1);
-        if (userId == -1) return;
-
-        Map<String, Object> actividad = new HashMap<>();
-        actividad.put("userId", userId);
-        actividad.put("action", "eliminó un manga");
-        actividad.put("mediaTitle", titulo);
-        actividad.put("imageUrl", imagen);
-
-        api.postActivity(actividad).enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                Log.d("ACTIVITY_DELETE", "Actividad de eliminación registrada");
-
+                Log.d("ACTIVITY", "Actividad registrada: " + action);
                 if (getParentFragment() instanceof FragmentProfile) {
                     ((FragmentProfile) getParentFragment()).loadActivity();
                 }
@@ -232,10 +208,8 @@ public class EditMangaFragment extends Fragment {
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
-                Log.e("ACTIVITY_DELETE", "Error al registrar actividad: " + t.getMessage(), t);
+                Log.e("ACTIVITY", "Error al registrar actividad: " + t.getMessage(), t);
             }
         });
     }
-
-
 }

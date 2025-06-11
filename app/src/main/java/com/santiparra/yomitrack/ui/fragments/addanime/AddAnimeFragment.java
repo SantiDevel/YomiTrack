@@ -75,18 +75,12 @@ public class AddAnimeFragment extends Fragment {
 
     private void setupSpinners() {
         ArrayAdapter<CharSequence> statusAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.anime_status_array,
-                R.layout.item_spinner
-        );
-        statusAdapter.setDropDownViewResource(R.layout.item_spinner); // ✅ blanco también al desplegar
+                requireContext(), R.array.anime_status_array, R.layout.item_spinner);
+        statusAdapter.setDropDownViewResource(R.layout.item_spinner);
         statusSpinner.setAdapter(statusAdapter);
 
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
-                requireContext(),
-                R.array.anime_type_array,
-                R.layout.item_spinner
-        );
+                requireContext(), R.array.anime_type_array, R.layout.item_spinner);
         typeAdapter.setDropDownViewResource(R.layout.item_spinner);
         typeSpinner.setAdapter(typeAdapter);
     }
@@ -128,23 +122,16 @@ public class AddAnimeFragment extends Fragment {
         String status = statusSpinner.getSelectedItem().toString();
         String type = typeSpinner.getSelectedItem().toString();
 
-        int score = 0;
-        int progress = 0;
-        try {
-            score = Integer.parseInt(scoreEditText.getText().toString());
-            progress = Integer.parseInt(progressEditText.getText().toString());
-        } catch (NumberFormatException ignored) {
-        }
+        int score = parseIntOrZero(scoreEditText.getText().toString());
+        int progress = parseIntOrZero(progressEditText.getText().toString());
 
         AnimeEntity anime = new AnimeEntity();
         anime.setUserId(userId);
         anime.setTitle(selected.getTitle());
 
-        if (selected.getImageUrl() == null || selected.getImageUrl().isEmpty()) {
-            selectedImageUrl = "android.resource://" + requireContext().getPackageName() + "/" + R.drawable.sample_cover;
-        } else {
-            selectedImageUrl = selected.getImageUrl();
-        }
+        selectedImageUrl = (selected.getImageUrl() == null || selected.getImageUrl().isEmpty())
+                ? "android.resource://" + requireContext().getPackageName() + "/" + R.drawable.sample_cover
+                : selected.getImageUrl();
 
         anime.setImageUrl(selectedImageUrl);
         anime.setStatus(status);
@@ -158,6 +145,7 @@ public class AddAnimeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(getContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     registrarActividad(anime.getTitle());
+                    notificarAñadido();
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
                     Toast.makeText(getContext(), "Error al guardar anime", Toast.LENGTH_SHORT).show();
@@ -182,17 +170,29 @@ public class AddAnimeFragment extends Fragment {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 Log.d("ACTIVITY_POST", "Código de respuesta: " + response.code());
-                if (!response.isSuccessful()) {
-                    Log.e("ACTIVITY_POST", "Error en response: " + response.errorBody());
-                }
             }
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
                 Log.e("ACTIVITY_POST", "Error al registrar actividad: " + t.getMessage(), t);
-                if (!isAdded()) return;
-                Toast.makeText(getContext(), "Error al registrar actividad", Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "Error al registrar actividad", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    private void notificarAñadido() {
+        Bundle result = new Bundle();
+        result.putBoolean("anime_added", true);
+        getParentFragmentManager().setFragmentResult("anime_add_request", result);
+    }
+
+    private int parseIntOrZero(String value) {
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

@@ -67,7 +67,7 @@ public class EditAnimeFragment extends Fragment {
         String[] typeArray = getResources().getStringArray(R.array.anime_type_array);
 
         ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, statusArray);
-        statusAdapter.setDropDownViewResource(R.layout.item_spinner); // Aplica color blanco en lista desplegable también
+        statusAdapter.setDropDownViewResource(R.layout.item_spinner);
         spinnerStatus.setAdapter(statusAdapter);
 
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, typeArray);
@@ -142,8 +142,6 @@ public class EditAnimeFragment extends Fragment {
         api.updateAnime(anime.getId(), anime).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                Log.d("API_RESPONSE", "onResponse ejecutado: " + response.body());
-
                 if (!isAdded()) return;
 
                 if (response.isSuccessful()) {
@@ -160,7 +158,6 @@ public class EditAnimeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
-                Log.e("API_RESPONSE", "onFailure ejecutado: " + t.getMessage(), t);
                 if (!isAdded()) return;
                 Toast.makeText(requireContext(), "Fallo en la conexión", Toast.LENGTH_SHORT).show();
             }
@@ -179,6 +176,10 @@ public class EditAnimeFragment extends Fragment {
                     Toast.makeText(requireContext(), "Anime eliminado", Toast.LENGTH_SHORT).show();
                     requireContext().getSharedPreferences("user_session", Context.MODE_PRIVATE)
                             .edit().putBoolean("refresh_profile", true).apply();
+                    Bundle result = new Bundle();
+                    result.putBoolean("anime_deleted", true);
+                    result.putInt("anime_id", anime.getId());
+                    getParentFragmentManager().setFragmentResult("anime_delete_request", result);
                     requireActivity().getSupportFragmentManager().popBackStack();
                 } else {
                     Toast.makeText(requireContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
@@ -230,7 +231,6 @@ public class EditAnimeFragment extends Fragment {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 Log.d("ACTIVITY_DELETE", "Actividad de eliminación registrada");
-
 
                 if (getParentFragment() instanceof FragmentProfile) {
                     ((FragmentProfile) getParentFragment()).loadActivity();

@@ -7,11 +7,10 @@
         </shape>
     </item>
 
-    <!-- Progreso (color por defecto, se sobrescribe desde Java) -->
     <item android:id="@android:id/progress">
         <clip>
             <shape android:shape="rectangle">
-                <solid android:color="#FFFFFF" /> <!-- No uses referencia aquí -->
+                <solid android:color="#FFFFFF" />
                 <corners android:radius="50dp" />
             </shape>
         </clip>
