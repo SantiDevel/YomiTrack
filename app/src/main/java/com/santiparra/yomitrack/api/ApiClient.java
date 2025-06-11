@@ -6,7 +6,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-
     /**
      * URL base del servidor donde está alojada la API del backend.
      * <p>Nota: "10.0.2.2" es una dirección especial utilizada para acceder al localhost
